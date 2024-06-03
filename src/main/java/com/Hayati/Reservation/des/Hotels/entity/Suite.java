@@ -1,51 +1,51 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
-import java.util.Set;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Hotel")
-public class Hotel {
+@Table(name = "Suite")
+public class Suite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_hot;
+    private long id_sui;
+
 
     @Column(nullable = false)
-    private String name;
+    private float prixJour;
 
     @Column(nullable = false)
-    private String emplacement;
+    private String disponibilites;
 
     @Column(nullable = false)
-    private String evaluation;
+    private String description;
 
     @Column(nullable = false)
-    private String localisation;
+    private String photos;
 
-    @Column(nullable = false)
-    private String commentaires;
+    @ManyToOne
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
 
-    @Column(nullable = false)
-    private String notifications;
+    @OneToMany(mappedBy = "suite")
+    private Set<Chambre> chambres;
 
-    @OneToMany(mappedBy = "hotel")
-    private Set<Employee> employees;
-
-    @OneToMany(mappedBy = "hotel")
-    private Set<Suite> suites;
+   
 }

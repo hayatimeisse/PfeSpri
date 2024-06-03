@@ -7,7 +7,8 @@ import lombok.Setter;
 @Setter
 public class HotelDto {
     private Long id_hot;
-    private Long chambre_id;
+    // private Long chambre_id;
+    private Long Employee_id;
     private String name;
     private String emplacement;
 

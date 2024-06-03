@@ -5,15 +5,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChambreDto {
-    private Long id_cham;
-    private Long suite_id;
-  
-    private int capacite;
+public class SuiteDto {
+    private Long id_sui;
+    private Long hotel_id;
     private float prixJour;
     private String disponibilites;
     private String description;
     private String photos;
-
     
 }

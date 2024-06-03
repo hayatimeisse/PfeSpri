@@ -6,9 +6,11 @@ import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.PaiementDto;
 import com.Hayati.Reservation.des.Hotels.entity.Chambre;
 import com.Hayati.Reservation.des.Hotels.entity.Paiement;
+import com.Hayati.Reservation.des.Hotels.entity.Suite;
 import com.Hayati.Reservation.des.Hotels.repositoriy.ChambreRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.PaiementRepositoriy;
-
+import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
+import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,49 +21,69 @@ import java.util.stream.Collectors;
 @Service
 public class ChambreService {
 
-    @Autowired
-    private ChambreRepositoriy chambreRepositoriy;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    public ChambreDto createChambre(ChambreDto chambreDto) {
-        Chambre chambre = modelMapper.map(chambreDto, Chambre.class);
-        chambre = chambreRepositoriy.save(chambre);
-        return modelMapper.map(chambre, ChambreDto.class);
-    }
-
-    public List<ChambreDto> getAllChambres() {
-        return chambreRepositoriy.findAll()
-                .stream()
-                .map(role -> modelMapper.map(chambreRepositoriy, ChambreDto.class))
-                .collect(Collectors.toList());
-    }
-
-    public ChambreDto getChambreById(Long id) {
-        return chambreRepositoriy.findById(id)
-                .map(role -> modelMapper.map(chambreRepositoriy, ChambreDto.class))
-                .orElse(null);
-    }
-
-    public ChambreDto updateChambre(Long id, ChambreDto chambreDto) {
-        return chambreRepositoriy.findById(id)
-                .map(existingChambre -> {
-                   
-                    existingChambre.setCapacite(chambreDto.getCapacite());
-                    existingChambre.setPrixJour(chambreDto.getPrixJour());
-                    existingChambre.setDisponibilites(chambreDto.getDisponibilites());
-                    existingChambre.setDescription(chambreDto.getDescription());
-                    existingChambre.setPhotos(chambreDto.getPhotos());
-
-                    chambreRepositoriy.save(existingChambre);
-                    return modelMapper.map(existingChambre, ChambreDto.class);
-                })
-                .orElse(null);
-    }
+        @Autowired
+        private ChambreRepositoriy chambreRepositoriy;
     
-
-    public void deleteChambre(Long id) {
-        chambreRepositoriy.deleteById(id);
+        @Autowired
+        private SuiteRepositoriy suiteRepositoriy;
+    
+        @Autowired
+        private ModelMapper modelMapper;
+    
+        public ChambreDto createChambre(ChambreDto chambreDto) {
+            Chambre chambre = modelMapper.map(chambreDto, Chambre.class); // Correction ici
+    
+            if (chambreDto.getSuite_id() != null) {
+                Optional<Suite> suite = suiteRepositoriy.findById(chambreDto.getSuite_id());
+                if (suite.isPresent()) {
+                    chambre.setSuite(suite.get());
+                } else {
+                    throw new RuntimeException("suite not found with id: " + chambreDto.getSuite_id());
+                }
+            }
+    
+            chambre = chambreRepositoriy.save(chambre);
+    
+            ChambreDto resultDto = modelMapper.map(chambre, ChambreDto.class);
+            resultDto.setSuite_id(chambre.getSuite() != null ? chambre.getSuite().getId_sui() : null);
+    
+            return resultDto;
+        }
+    
+        public List<ChambreDto> getAllChambres() {
+            return chambreRepositoriy.findAll()
+                    .stream()
+                    .map(chambre -> modelMapper.map(chambre, ChambreDto.class))
+                    .collect(Collectors.toList());
+        }
+    
+        public ChambreDto getChambreById(Long id) {
+            return chambreRepositoriy.findById(id)
+                    .map(chambre -> modelMapper.map(chambre, ChambreDto.class))
+                    .orElse(null);
+        }
+    
+        public ChambreDto updateChambre(Long id, ChambreDto chambreDto) {
+            Optional<Chambre> optionalChambre = chambreRepositoriy.findById(id);
+            if (optionalChambre.isPresent()) {
+                Chambre chambre = optionalChambre.get();
+                chambre.setCapacite(chambreDto.getCapacite());
+                chambre.setPrixJour(chambreDto.getPrixJour());
+                chambre.setDisponibilites(chambreDto.getDisponibilites());
+                chambre.setDescription(chambreDto.getDescription());
+                chambre.setPhotos(chambreDto.getPhotos());
+    
+                Optional<Suite> suite = suiteRepositoriy.findById(chambreDto.getSuite_id());
+                suite.ifPresent(chambre::setSuite);
+    
+                chambre = chambreRepositoriy.save(chambre);
+    
+                return modelMapper.map(chambre, ChambreDto.class);
+            }
+            return null;
+        }
+    
+        public void deleteChambre(Long id) {
+            chambreRepositoriy.deleteById(id);
+        }
     }
-}

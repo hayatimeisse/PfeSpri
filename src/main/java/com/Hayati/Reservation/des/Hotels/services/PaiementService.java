@@ -29,13 +29,13 @@ public class PaiementService {
     public List<PaiementDto> getAllPaiements() {
         return paiementRepositoriy.findAll()
                 .stream()
-                .map(role -> modelMapper.map(paiementRepositoriy, PaiementDto.class))
+                .map(paiement -> modelMapper.map(paiementRepositoriy, PaiementDto.class))
                 .collect(Collectors.toList());
     }
 
     public PaiementDto getPaiementById(Long id) {
         return paiementRepositoriy.findById(id)
-                .map(role -> modelMapper.map(paiementRepositoriy, PaiementDto.class))
+                .map(paiement -> modelMapper.map(paiementRepositoriy, PaiementDto.class))
                 .orElse(null);
     }
 
