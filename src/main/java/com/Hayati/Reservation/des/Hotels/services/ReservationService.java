@@ -2,8 +2,10 @@ package com.Hayati.Reservation.des.Hotels.services;
 
 import com.Hayati.Reservation.des.Hotels.dto.ReservationDto;
 import com.Hayati.Reservation.des.Hotels.entity.Reservation;
+import com.Hayati.Reservation.des.Hotels.entity.User;
 import com.Hayati.Reservation.des.Hotels.repositoriy.PaiementRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.ReservationRepositoriy;
+import com.Hayati.Reservation.des.Hotels.repositoriy.UserRepository;
 import com.Hayati.Reservation.des.Hotels.entity.Paiement;
 
 import org.modelmapper.ModelMapper;
@@ -21,6 +23,8 @@ public class ReservationService {
 
     @Autowired
     private PaiementRepositoriy paiementRepositoriy;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -28,26 +32,39 @@ public class ReservationService {
     public ReservationDto createReservation(ReservationDto reservationDto) {
         Reservation reservation = modelMapper.map(reservationDto, Reservation.class);
         
-        // Gestion du paiement
+        // Handle Paiement
         if (reservationDto.getPaiement_id() != null) {
             Optional<Paiement> paiement = paiementRepositoriy.findById(reservationDto.getPaiement_id());
             if (paiement.isPresent()) {
                 reservation.setPaiement(paiement.get());
             } else {
-                // Si aucun paiement n'est trouvé avec l'id fourni, traiter selon les besoins (par exemple, renvoyer une erreur)
-                // throw new RuntimeException("Paiement not found with id: " + reservationDto.getPaiement_id());
+                // Handle case when no paiement is found
+                throw new RuntimeException("Paiement not found with id: " + reservationDto.getPaiement_id());
             }
         }
-        
-        // Enregistrement de la réservation avec le paiement lié
+    
+        // Handle User
+        if (reservationDto.getUser_id() != null) {
+            Optional<User> user = userRepository.findById(reservationDto.getUser_id());
+            if (user.isPresent()) {
+                reservation.setUser(user.get());
+            } else {
+                // Handle case when no user is found
+                throw new RuntimeException("User not found with id: " + reservationDto.getUser_id());
+            }
+        }
+    
+        // Save the reservation
         reservation = reservationRepositoriy.save(reservation);
-        
-        // Assurez-vous que le DTO retourné a l'id du paiement correctement configuré
+    
+        // Ensure the returned DTO has the correct ids set
         ReservationDto resultDto = modelMapper.map(reservation, ReservationDto.class);
         resultDto.setPaiement_id(reservation.getPaiement() != null ? reservation.getPaiement().getId_pai() : null);
-        
+        resultDto.setUser_id(reservation.getUser() != null ? reservation.getUser().getId_user() : null);
+    
         return resultDto;
     }
+    
     
 
     public List<ReservationDto> getAllReservations() {

@@ -1,11 +1,8 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
-
-
-
-
 import jakarta.persistence.*; 
 import lombok.*;
+import java.util.Set;
 
 @Data
 @Entity
@@ -30,6 +27,8 @@ public class User {
     private String numerodetelephone;
     // @Column(nullable = false)
     // private String adresse;
+    @OneToMany(mappedBy = "user")
+    private Set<Reservation> reservations;
   
    
 }

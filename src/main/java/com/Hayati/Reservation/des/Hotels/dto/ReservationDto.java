@@ -9,6 +9,7 @@ import lombok.Setter;
 public class ReservationDto {
     private Long id_res;
     private Long paiement_id;
+    private Long user_id;
     private Date dateSejour;
     private float nombreChambre;
     private String statutReser;

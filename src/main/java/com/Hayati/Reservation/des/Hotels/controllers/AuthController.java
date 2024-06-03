@@ -91,4 +91,5 @@ public class AuthController {
             return new ResponseEntity<>("An error occurred during user registration", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
 }
