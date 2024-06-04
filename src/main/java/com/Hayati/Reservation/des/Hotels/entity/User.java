@@ -6,6 +6,7 @@ import java.util.Set;
 
 @Data
 @Entity
+
 @Table(name = "Utilisateur", uniqueConstraints = {
      //   @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})
@@ -27,6 +28,7 @@ public class User {
     private String numerodetelephone;
     // @Column(nullable = false)
     // private String adresse;
+
     @OneToMany(mappedBy = "user")
     private Set<Reservation> reservations;
   
