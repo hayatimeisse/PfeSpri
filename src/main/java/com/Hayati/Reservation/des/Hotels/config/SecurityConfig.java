@@ -1,6 +1,5 @@
 package com.Hayati.Reservation.des.Hotels.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +32,7 @@ public class SecurityConfig {
         http
             .cors().and().csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html").permitAll()  // Autoriser Swagger UI
                 .anyRequest().authenticated()
             )
             .exceptionHandling().accessDeniedPage("/403")
