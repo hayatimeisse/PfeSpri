@@ -32,7 +32,7 @@ public class SecurityConfig {
         http
             .cors().and().csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html").permitAll()  // Autoriser Swagger UI
+                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling().accessDeniedPage("/403")
