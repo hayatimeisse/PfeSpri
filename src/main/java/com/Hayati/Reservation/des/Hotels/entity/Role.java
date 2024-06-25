@@ -16,18 +16,13 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "Role")
+@Table(name = "roles")
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_role;
 
-    @Column(length = 60,nullable = false)
+    @Column(length = 60)
     private String name;
-   
-    @OneToMany(mappedBy = "role")
-    private Set<User> users;
-
-   
 }
