@@ -1,6 +1,10 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.Set;
 
@@ -16,15 +20,22 @@ public class User {
     @Column(name = "id_user")
     private long id_user;
 
+    @NotBlank
     @Column(nullable = false)
     private String name;
 
+    @NotBlank
+    @Email
+    @Pattern(regexp = "^[\\w.+\\-]+@gmail\\.com$", message = "Email must be a valid gmail address")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotBlank
     @Column(nullable = false)
     private String password;
 
+    @NotBlank
+    @Pattern(regexp = "\\d{8}", message = "Phone number must be 8 digits")
     @Column(nullable = false, unique = true)
     private String numerodetelephone;
 

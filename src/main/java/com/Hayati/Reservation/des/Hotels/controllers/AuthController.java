@@ -1,7 +1,5 @@
 package com.Hayati.Reservation.des.Hotels.controllers;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,24 +8,25 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-
+import com.Hayati.Reservation.des.Hotels.dto.ChangePasswordDto;
 import com.Hayati.Reservation.des.Hotels.dto.LoginDTO;
 import com.Hayati.Reservation.des.Hotels.dto.SignupDto;
 import com.Hayati.Reservation.des.Hotels.entity.User;
 import com.Hayati.Reservation.des.Hotels.repositoriy.UserRepository;
-
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -90,6 +89,30 @@ public class AuthController {
             logger.error("An error occurred during user registration", e);
             return new ResponseEntity<>("An error occurred during user registration", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto, Principal principal) {
+        if (principal == null) {
+            logger.warn("User not authenticated");
+            return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+    
+        String email = principal.getName();
+        logger.info("Changing password for user: {}", email);
+        
+        User currentUser = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    
+        if (!changePasswordDto.getNouveauMotDePasse().equals(changePasswordDto.getConfirmerMotDePasse())) {
+            logger.warn("Passwords do not match for user: {}", email);
+            return new ResponseEntity<>("Passwords do not match", HttpStatus.BAD_REQUEST);
+        }
+    
+        currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNouveauMotDePasse()));
+        userRepository.save(currentUser);
+        logger.info("Password updated successfully for user: {}", email);
+        return ResponseEntity.ok("Password updated successfully");
     }
     
 }

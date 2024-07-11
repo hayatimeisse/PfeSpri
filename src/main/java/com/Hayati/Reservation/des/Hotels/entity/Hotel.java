@@ -5,12 +5,13 @@ import java.util.Set;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "hotel") 
+@Table(name = "hotel")
 public class Hotel {
 
     @Id
@@ -34,6 +35,9 @@ public class Hotel {
 
     @Column(nullable = false)
     private String notifications;
+
+    @Column(nullable = false)
+    private String imageUrl;
 
     @OneToMany(mappedBy = "hotel")
     private Set<Employee> employees;

@@ -24,19 +24,33 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    // @Override
+    // public UserDetails loadUserByUsername(String emailOrnumerodetelephone) throws UsernameNotFoundException {
+    //       User user = userRepository.findByEmailOrNumerodetelephone(emailOrnumerodetelephone, emailOrnumerodetelephone)
+    //              .orElseThrow(() ->
+    //                      new UsernameNotFoundException("User not found with username or email: "+ emailOrnumerodetelephone));
+
+    //     Set<GrantedAuthority> authorities = user
+    //             .getRoles()
+    //             .stream()
+    //             .map((role) -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
+
+    //     return new org.springframework.security.core.userdetails.User(user.getEmail(),
+    //             user.getPassword(),
+    //             authorities);
+    // }
+
     @Override
-    public UserDetails loadUserByUsername(String emailOrnumerodetelephone) throws UsernameNotFoundException {
-          User user = userRepository.findByEmailOrNumerodetelephone(emailOrnumerodetelephone, emailOrnumerodetelephone)
-                 .orElseThrow(() ->
-                         new UsernameNotFoundException("User not found with username or email: "+ emailOrnumerodetelephone));
+public UserDetails loadUserByUsername(String emailOrnumerodetelephone) throws UsernameNotFoundException {
+    User user = userRepository.findByEmailOrNumerodetelephone(emailOrnumerodetelephone, emailOrnumerodetelephone)
+        .orElseThrow(() ->
+            new UsernameNotFoundException("User not found with username or email: " + emailOrnumerodetelephone));
 
-        Set<GrantedAuthority> authorities = user
-                .getRoles()
-                .stream()
-                .map((role) -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
+    Set<GrantedAuthority> authorities = user.getRoles().stream()
+        .map(role -> new SimpleGrantedAuthority(role.getName()))
+        .collect(Collectors.toSet());
 
-        return new org.springframework.security.core.userdetails.User(user.getEmail(),
-                user.getPassword(),
-                authorities);
-    }
+    return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+}
+
 }

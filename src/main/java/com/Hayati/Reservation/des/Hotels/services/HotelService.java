@@ -23,14 +23,13 @@ public class HotelService {
     @Autowired
     private HotelRepositoriy hotelRepositoriy;
 
-   
-
     @Autowired
     private ModelMapper modelMapper;
 
-
-   
     public HotelDto createHotel(HotelDto hotelDto) {
+        if (hotelDto.getImageUrl() == null || hotelDto.getImageUrl().isEmpty()) {
+            hotelDto.setImageUrl("default-image-url");
+        }
         Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
         hotel = hotelRepositoriy.save(hotel);
         return modelMapper.map(hotel, HotelDto.class);
@@ -39,39 +38,36 @@ public class HotelService {
     public List<HotelDto> getAllHotels() {
         return hotelRepositoriy.findAll()
                 .stream()
-                .map(hotel -> modelMapper.map(hotelRepositoriy, HotelDto.class))
+                .map(hotel -> modelMapper.map(hotel, HotelDto.class))
                 .collect(Collectors.toList());
     }
 
     public HotelDto getHotelById(Long id) {
         return hotelRepositoriy.findById(id)
-                .map(hotel -> modelMapper.map(hotelRepositoriy, HotelDto.class))
+                .map(hotel -> modelMapper.map(hotel, HotelDto.class))
                 .orElse(null);
     }
 
     public HotelDto updateHotel(Long id, HotelDto hotelDto) {
         return hotelRepositoriy.findById(id)
                 .map(existingHotel -> {
-                    // Update the attributes of the existingHotel object with the values from hotelDto
                     existingHotel.setName(hotelDto.getName());
                     existingHotel.setEmplacement(hotelDto.getEmplacement());
                     existingHotel.setEvaluation(hotelDto.getEvaluation());
                     existingHotel.setLocalisation(hotelDto.getLocalisation());
                     existingHotel.setCommentaires(hotelDto.getCommentaires());
                     existingHotel.setNotifications(hotelDto.getNotifications());
-                    
-                    // Save the updated hotel entity in the repository
+                    existingHotel.setImageUrl(hotelDto.getImageUrl());
+
                     hotelRepositoriy.save(existingHotel);
-                    
-                    // Map the updated hotel entity to a HotelDto object and return it
                     return modelMapper.map(existingHotel, HotelDto.class);
                 })
                 .orElse(null);
     }
-    
-    
 
     public void deleteHotel(Long id) {
         hotelRepositoriy.deleteById(id);
     }
 }
+
+ 
