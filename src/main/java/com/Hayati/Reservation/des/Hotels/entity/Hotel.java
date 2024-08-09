@@ -36,8 +36,8 @@ public class Hotel {
     @Column(nullable = false)
     private String notifications;
 
-    @Column(nullable = false)
-    private String imageUrl;
+    
+   
 
     @OneToMany(mappedBy = "hotel")
     private Set<Employee> employees;
@@ -51,4 +51,15 @@ public class Hotel {
         inverseJoinColumns = @JoinColumn(name = "services_id", referencedColumnName = "id_ser")
     )
     private Set<ServicesDisponibles> servicesDisponibles;
+
+    @Column(nullable = false)
+    private String imageUrl; 
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

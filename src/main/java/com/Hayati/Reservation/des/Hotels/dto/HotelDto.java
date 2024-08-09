@@ -3,7 +3,6 @@ package com.Hayati.Reservation.des.Hotels.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 public class HotelDto {
@@ -14,5 +13,5 @@ public class HotelDto {
     private String localisation;
     private String commentaires;
     private String notifications;
-    private String imageUrl;
+    private String imageUrl; 
 }

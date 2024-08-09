@@ -11,6 +11,5 @@ public class SuiteDto {
     private float prixJour;
     private String disponibilites;
     private String description;
-    private String photos;
-    
+    private String imageUrl; 
 }

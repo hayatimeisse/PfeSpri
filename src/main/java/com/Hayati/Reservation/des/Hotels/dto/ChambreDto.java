@@ -8,12 +8,9 @@ import lombok.Setter;
 public class ChambreDto {
     private Long id_cham;
     private Long suite_id;
-  
     private int capacite;
     private float prixJour;
     private String disponibilites;
     private String description;
-    private String photos;
-
-    
+    private String imageUrl; 
 }

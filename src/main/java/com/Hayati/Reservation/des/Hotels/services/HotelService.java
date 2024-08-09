@@ -1,20 +1,13 @@
 package com.Hayati.Reservation.des.Hotels.services;
 
-import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
-import com.Hayati.Reservation.des.Hotels.dto.EmployeeDto;
 import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
-import com.Hayati.Reservation.des.Hotels.entity.Chambre;
-import com.Hayati.Reservation.des.Hotels.entity.Employee;
 import com.Hayati.Reservation.des.Hotels.entity.Hotel;
-import com.Hayati.Reservation.des.Hotels.repositoriy.ChambreRepositoriy;
-import com.Hayati.Reservation.des.Hotels.repositoriy.EmployeeRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.HotelRepositoriy;
-import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,51 +16,86 @@ public class HotelService {
     @Autowired
     private HotelRepositoriy hotelRepositoriy;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    public HotelDto createHotel(HotelDto hotelDto, String imageUrl) {
+       
+        Hotel hotel = new Hotel();
+        hotel.setName(hotelDto.getName());
+        hotel.setEmplacement(hotelDto.getEmplacement());
+        hotel.setEvaluation(hotelDto.getEvaluation());
+        hotel.setLocalisation(hotelDto.getLocalisation());
+        hotel.setCommentaires(hotelDto.getCommentaires());
+        hotel.setNotifications(hotelDto.getNotifications());
+        hotel.setImageUrl(imageUrl);  
 
-    public HotelDto createHotel(HotelDto hotelDto) {
-        if (hotelDto.getImageUrl() == null || hotelDto.getImageUrl().isEmpty()) {
-            hotelDto.setImageUrl("default-image-url");
-        }
-        Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
-        hotel = hotelRepositoriy.save(hotel);
-        return modelMapper.map(hotel, HotelDto.class);
+        Hotel savedHotel = hotelRepositoriy.save(hotel);
+
+        
+        HotelDto savedHotelDto = new HotelDto();
+        savedHotelDto.setId_hot(savedHotel.getId_hot());
+        savedHotelDto.setName(savedHotel.getName());
+        savedHotelDto.setEmplacement(savedHotel.getEmplacement());
+        savedHotelDto.setEvaluation(savedHotel.getEvaluation());
+        savedHotelDto.setLocalisation(savedHotel.getLocalisation());
+        savedHotelDto.setCommentaires(savedHotel.getCommentaires());
+        savedHotelDto.setNotifications(savedHotel.getNotifications());
+        savedHotelDto.setImageUrl(savedHotel.getImageUrl()); // Ensure imageUrl is included
+
+        return savedHotelDto;
     }
 
     public List<HotelDto> getAllHotels() {
-        return hotelRepositoriy.findAll()
-                .stream()
-                .map(hotel -> modelMapper.map(hotel, HotelDto.class))
-                .collect(Collectors.toList());
+        return hotelRepositoriy.findAll().stream().map(hotel -> {
+            HotelDto hotelDto = new HotelDto();
+            hotelDto.setId_hot(hotel.getId_hot());
+            hotelDto.setName(hotel.getName());
+            hotelDto.setEmplacement(hotel.getEmplacement());
+            hotelDto.setEvaluation(hotel.getEvaluation());
+            hotelDto.setLocalisation(hotel.getLocalisation());
+            hotelDto.setCommentaires(hotel.getCommentaires());
+            hotelDto.setNotifications(hotel.getNotifications());
+            hotelDto.setImageUrl(hotel.getImageUrl()); 
+            return hotelDto;
+        }).collect(Collectors.toList());
     }
 
     public HotelDto getHotelById(Long id) {
-        return hotelRepositoriy.findById(id)
-                .map(hotel -> modelMapper.map(hotel, HotelDto.class))
-                .orElse(null);
+        return hotelRepositoriy.findById(id).map(hotel -> {
+            HotelDto hotelDto = new HotelDto();
+            hotelDto.setId_hot(hotel.getId_hot());
+            hotelDto.setName(hotel.getName());
+            hotelDto.setEmplacement(hotel.getEmplacement());
+            hotelDto.setEvaluation(hotel.getEvaluation());
+            hotelDto.setLocalisation(hotel.getLocalisation());
+            hotelDto.setCommentaires(hotel.getCommentaires());
+            hotelDto.setNotifications(hotel.getNotifications());
+            hotelDto.setImageUrl(hotel.getImageUrl()); 
+            return hotelDto;
+        }).orElse(null);
     }
 
     public HotelDto updateHotel(Long id, HotelDto hotelDto) {
-        return hotelRepositoriy.findById(id)
-                .map(existingHotel -> {
-                    existingHotel.setName(hotelDto.getName());
-                    existingHotel.setEmplacement(hotelDto.getEmplacement());
-                    existingHotel.setEvaluation(hotelDto.getEvaluation());
-                    existingHotel.setLocalisation(hotelDto.getLocalisation());
-                    existingHotel.setCommentaires(hotelDto.getCommentaires());
-                    existingHotel.setNotifications(hotelDto.getNotifications());
-                    existingHotel.setImageUrl(hotelDto.getImageUrl());
-
-                    hotelRepositoriy.save(existingHotel);
-                    return modelMapper.map(existingHotel, HotelDto.class);
-                })
-                .orElse(null);
+        return hotelRepositoriy.findById(id).map(hotel -> {
+            hotel.setName(hotelDto.getName());
+            hotel.setEmplacement(hotelDto.getEmplacement());
+            hotel.setEvaluation(hotelDto.getEvaluation());
+            hotel.setLocalisation(hotelDto.getLocalisation());
+            hotel.setCommentaires(hotelDto.getCommentaires());
+            hotel.setNotifications(hotelDto.getNotifications());
+            Hotel updatedHotel = hotelRepositoriy.save(hotel);
+            HotelDto updatedHotelDto = new HotelDto();
+            updatedHotelDto.setId_hot(updatedHotel.getId_hot());
+            updatedHotelDto.setName(updatedHotel.getName());
+            updatedHotelDto.setEmplacement(updatedHotel.getEmplacement());
+            updatedHotelDto.setEvaluation(updatedHotel.getEvaluation());
+            updatedHotelDto.setLocalisation(updatedHotel.getLocalisation());
+            updatedHotelDto.setCommentaires(updatedHotel.getCommentaires());
+            updatedHotelDto.setNotifications(updatedHotel.getNotifications());
+            updatedHotelDto.setImageUrl(updatedHotel.getImageUrl()); 
+            return updatedHotelDto;
+        }).orElse(null);
     }
 
     public void deleteHotel(Long id) {
         hotelRepositoriy.deleteById(id);
     }
 }
-
- 

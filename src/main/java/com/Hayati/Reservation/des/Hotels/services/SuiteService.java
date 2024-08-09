@@ -1,19 +1,21 @@
 package com.Hayati.Reservation.des.Hotels.services;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.List;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.entity.Hotel;
 import com.Hayati.Reservation.des.Hotels.entity.Suite;
 import com.Hayati.Reservation.des.Hotels.repositoriy.HotelRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SuiteService {
+
     @Autowired
     private SuiteRepositoriy suiteRepositoriy;
 
@@ -23,8 +25,8 @@ public class SuiteService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public SuiteDto createSuite(SuiteDto suiteDto) {
-        Suite suite = modelMapper.map(suiteDto, Suite.class); // Correction ici
+    public SuiteDto createSuite(SuiteDto suiteDto, String imageUrl) {
+        Suite suite = modelMapper.map(suiteDto, Suite.class);
 
         if (suiteDto.getHotel_id() != null) {
             Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
@@ -35,6 +37,7 @@ public class SuiteService {
             }
         }
 
+        suite.setImageUrl(imageUrl); // Set the image URL
         suite = suiteRepositoriy.save(suite);
 
         SuiteDto resultDto = modelMapper.map(suite, SuiteDto.class);
@@ -56,15 +59,14 @@ public class SuiteService {
                 .orElse(null);
     }
 
-    public SuiteDto updateSuite(Long id, SuiteDto suiteDto) {
+    public SuiteDto updateSuite(Long id, SuiteDto suiteDto, String imageUrl) {
         Optional<Suite> optionalSuite = suiteRepositoriy.findById(id);
         if (optionalSuite.isPresent()) {
             Suite suite = optionalSuite.get();
             suite.setPrixJour(suiteDto.getPrixJour());
             suite.setDisponibilites(suiteDto.getDisponibilites());
             suite.setDescription(suiteDto.getDescription());
-            suite.setPhotos(suiteDto.getPhotos());
-
+            suite.setImageUrl(imageUrl); // Update the image URL
             Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
             hotel.ifPresent(suite::setHotel);
 

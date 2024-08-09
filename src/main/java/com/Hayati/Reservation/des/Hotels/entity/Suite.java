@@ -38,7 +38,7 @@ public class Suite {
     private String description;
 
     @Column(nullable = false)
-    private String photos;
+    private String imageUrl;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")

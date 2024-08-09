@@ -1,13 +1,12 @@
 package com.Hayati.Reservation.des.Hotels.repositoriy;
 
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import com.Hayati.Reservation.des.Hotels.entity.User;
+import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByNumerodetelephone(String numerodetelephone);
+@Repository
+public interface UserRepository extends CrudRepository<User, Integer> {
     Optional<User> findByEmail(String email);
-    Boolean existsByEmail(String email);
-    Boolean existsByNumerodetelephone(String numerodetelephone);
-    Optional<User> findByEmailOrNumerodetelephone(String emailOrNumerodetelephone, String numerodetelephone);
+    Optional<User> findByNumerodetelephone(String numerodetelephone);
 }

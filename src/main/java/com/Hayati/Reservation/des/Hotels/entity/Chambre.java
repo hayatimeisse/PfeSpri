@@ -40,7 +40,9 @@ public class Chambre {
     private String description;
 
     @Column(nullable = false)
-    private String photos;
+    private String imageUrl; 
+
+
 
     @ManyToOne
     @JoinColumn(name = "suite_id")

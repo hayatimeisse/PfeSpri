@@ -6,7 +6,6 @@ import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.PaiementDto;
 import com.Hayati.Reservation.des.Hotels.dto.RoleDto;
 import com.Hayati.Reservation.des.Hotels.services.ChambreService;
-import com.Hayati.Reservation.des.Hotels.services.PaiementService;
 import com.Hayati.Reservation.des.Hotels.services.RoleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
