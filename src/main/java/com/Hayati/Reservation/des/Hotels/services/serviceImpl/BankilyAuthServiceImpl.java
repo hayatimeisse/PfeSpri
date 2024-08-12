@@ -14,10 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import com.Hayati.Reservation.des.Hotels.dto.BankilyAuthResponse;
 import com.Hayati.Reservation.des.Hotels.services.BankilyAuthService;
 
-
-
-
-
 @Service
 public class BankilyAuthServiceImpl implements BankilyAuthService {
 

@@ -15,8 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth/chambre")
+// @RequestMapping("/chambre")
+
 public class ChambreController {
 
     @Autowired
@@ -57,7 +60,7 @@ public class ChambreController {
         List<ChambreDto> chambres = chambreService.getAllChambres();
         return ResponseEntity.ok(chambres);
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<ChambreDto> getChambreById(@PathVariable Long id) {
         ChambreDto chambre = chambreService.getChambreById(id);
