@@ -27,25 +27,28 @@ public class ChambreService {
 
     public ChambreDto createChambre(ChambreDto chambreDto, String imageUrl) {
         Chambre chambre = modelMapper.map(chambreDto, Chambre.class);
-
+    
+        // Vérifiez que l'id de la suite est bien associé
         if (chambreDto.getSuite_id() != null) {
             Optional<Suite> suite = suiteRepositoriy.findById(chambreDto.getSuite_id());
             if (suite.isPresent()) {
                 chambre.setSuite(suite.get());
             } else {
-                throw new RuntimeException("suite not found with id: " + chambreDto.getSuite_id());
+                throw new RuntimeException("Suite non trouvée avec l'id: " + chambreDto.getSuite_id());
             }
         }
-
-        chambre.setImageUrl(imageUrl); // Set the image URL
+    
+        chambre.setImageUrl(imageUrl); // Associe l'URL de l'image
         chambre = chambreRepositoriy.save(chambre);
-
+    
         ChambreDto resultDto = modelMapper.map(chambre, ChambreDto.class);
         resultDto.setSuite_id(chambre.getSuite() != null ? chambre.getSuite().getId_sui() : null);
-
+    
         return resultDto;
     }
-
+    
+    
+    
     public List<ChambreDto> getAllChambres() {
         return chambreRepositoriy.findAll()
                 .stream()

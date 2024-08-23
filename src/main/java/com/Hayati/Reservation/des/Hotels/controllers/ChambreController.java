@@ -15,43 +15,41 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth/chambre")
-// @RequestMapping("/chambre")
-
 public class ChambreController {
 
     @Autowired
     private ChambreService chambreService;
+
+    private static final String UPLOAD_DIR = "C:\\Pfe\\Reservation_hotels\\";
 
     @PostMapping
     public ResponseEntity<ChambreDto> createChambre(
             @RequestPart("chambre") String chambreDtoJson,
             @RequestPart("photo") MultipartFile photo) {
         try {
-            // Deserialize the chambre DTO
+            // Désérialisation de l'objet JSON en DTO Chambre
             ObjectMapper objectMapper = new ObjectMapper();
             ChambreDto chambreDto = objectMapper.readValue(chambreDtoJson, ChambreDto.class);
 
-            // Handle the file upload
+            // Gestion de l'upload du fichier image
             String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-            String uploadDir = "src/main/resources/static/images/";
-            File uploadDirFile = new File(uploadDir);
+            File uploadDirFile = new File(UPLOAD_DIR);
             if (!uploadDirFile.exists()) {
                 uploadDirFile.mkdirs();
             }
-            Files.copy(photo.getInputStream(), Paths.get(uploadDir + fileName), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(photo.getInputStream(), Paths.get(UPLOAD_DIR + fileName), StandardCopyOption.REPLACE_EXISTING);
 
-            // Construct the image URL
+            // Construction de l'URL de l'image
             String imageUrl = "/images/" + fileName;
 
-            // Save the chambre information along with the image URL
+            // Enregistrement des informations de la chambre avec l'URL de l'image
             ChambreDto createdChambre = chambreService.createChambre(chambreDto, imageUrl);
 
             return ResponseEntity.ok(createdChambre);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            return ResponseEntity.status(500).body(null);  // Gérer l'exception de manière appropriée
         }
     }
 
@@ -60,7 +58,7 @@ public class ChambreController {
         List<ChambreDto> chambres = chambreService.getAllChambres();
         return ResponseEntity.ok(chambres);
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<ChambreDto> getChambreById(@PathVariable Long id) {
         ChambreDto chambre = chambreService.getChambreById(id);
@@ -71,36 +69,40 @@ public class ChambreController {
     public ResponseEntity<ChambreDto> updateChambre(
             @PathVariable Long id,
             @RequestPart("chambre") String chambreDtoJson,
-            @RequestPart("photo") MultipartFile photo) {
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
         try {
-            // Deserialize the chambre DTO
+            // Désérialisation de l'objet JSON en DTO Chambre
             ObjectMapper objectMapper = new ObjectMapper();
             ChambreDto chambreDto = objectMapper.readValue(chambreDtoJson, ChambreDto.class);
 
-            // Handle the file upload
-            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-            String uploadDir = "src/main/resources/static/images/";
-            File uploadDirFile = new File(uploadDir);
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
+            String imageUrl = null;
+
+            // Gestion de l'upload du fichier si une nouvelle image est fournie
+            if (photo != null && !photo.isEmpty()) {
+                String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+                File uploadDirFile = new File(UPLOAD_DIR);
+                if (!uploadDirFile.exists()) {
+                    uploadDirFile.mkdirs();
+                }
+                Files.copy(photo.getInputStream(), Paths.get(UPLOAD_DIR + fileName), StandardCopyOption.REPLACE_EXISTING);
+                imageUrl = "/images/" + fileName;  // URL de la nouvelle image
+            } else {
+                // Conserver l'image existante si aucune nouvelle image n'est fournie
+                imageUrl = chambreService.getChambreById(id).getImageUrl();
             }
-            Files.copy(photo.getInputStream(), Paths.get(uploadDir + fileName), StandardCopyOption.REPLACE_EXISTING);
 
-            // Construct the image URL
-            String imageUrl = "/images/" + fileName;
-
-            // Update the chambre information along with the image URL
+            // Mise à jour de la chambre avec l'URL de l'image
             ChambreDto updatedChambre = chambreService.updateChambre(id, chambreDto, imageUrl);
 
             return ResponseEntity.ok(updatedChambre);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            return ResponseEntity.status(500).body(null);  // Gérer l'exception de manière appropriée
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChambre(@PathVariable Long id) {
         chambreService.deleteChambre(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();  // Retourner une réponse avec un statut 204 (No Content)
     }
 }

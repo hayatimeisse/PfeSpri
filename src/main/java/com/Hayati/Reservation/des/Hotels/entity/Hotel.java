@@ -29,6 +29,7 @@ public class Hotel {
 
     @Column(nullable = false)
     private String localisation;
+    
 
     @Column(nullable = false)
     private String commentaires;

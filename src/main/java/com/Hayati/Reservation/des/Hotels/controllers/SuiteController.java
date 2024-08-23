@@ -4,6 +4,7 @@ import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.services.SuiteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,18 +28,18 @@ public class SuiteController {
             @RequestPart("suite") String suiteDtoJson,
             @RequestPart("photo") MultipartFile photo) {
         try {
-            // Deserialize the suite DTO
+            // Deserialize the Suite DTO
             ObjectMapper objectMapper = new ObjectMapper();
             SuiteDto suiteDto = objectMapper.readValue(suiteDtoJson, SuiteDto.class);
 
             // Handle the file upload
             String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-            String uploadDir = "src/main/resources/static/images/";
+            String uploadDir = "C:\\Pfe\\Reservation_hotels";
             File uploadDirFile = new File(uploadDir);
             if (!uploadDirFile.exists()) {
                 uploadDirFile.mkdirs();
             }
-            Files.copy(photo.getInputStream(), Paths.get(uploadDir + fileName), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(photo.getInputStream(), Paths.get(uploadDir + File.separator + fileName), StandardCopyOption.REPLACE_EXISTING);
 
             // Construct the image URL
             String imageUrl = "/images/" + fileName;
@@ -48,7 +49,9 @@ public class SuiteController {
 
             return ResponseEntity.ok(createdSuite);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
@@ -68,30 +71,36 @@ public class SuiteController {
     public ResponseEntity<SuiteDto> updateSuite(
             @PathVariable Long id,
             @RequestPart("suite") String suiteDtoJson,
-            @RequestPart("photo") MultipartFile photo) {
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
         try {
-            // Deserialize the suite DTO
+            // Deserialize the Suite DTO
             ObjectMapper objectMapper = new ObjectMapper();
             SuiteDto suiteDto = objectMapper.readValue(suiteDtoJson, SuiteDto.class);
 
-            // Handle the file upload
-            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-            String uploadDir = "src/main/resources/static/images/";
-            File uploadDirFile = new File(uploadDir);
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
+            String imageUrl = null;
+
+            // Handle the file upload if a new photo is provided
+            if (photo != null && !photo.isEmpty()) {
+                String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+                String uploadDir = "C:\\Pfe\\Reservation_hotels";
+                File uploadDirFile = new File(uploadDir);
+                if (!uploadDirFile.exists()) {
+                    uploadDirFile.mkdirs();
+                }
+                Files.copy(photo.getInputStream(), Paths.get(uploadDir + File.separator + fileName), StandardCopyOption.REPLACE_EXISTING);
+
+                // Construct the image URL
+                imageUrl = "/images/" + fileName;
             }
-            Files.copy(photo.getInputStream(), Paths.get(uploadDir + fileName), StandardCopyOption.REPLACE_EXISTING);
 
-            // Construct the image URL
-            String imageUrl = "/images/" + fileName;
-
-            // Update the suite information along with the image URL
+            // Update the suite information, with or without a new image URL
             SuiteDto updatedSuite = suiteService.updateSuite(id, suiteDto, imageUrl);
 
             return ResponseEntity.ok(updatedSuite);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 

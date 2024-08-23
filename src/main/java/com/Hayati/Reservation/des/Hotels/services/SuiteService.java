@@ -49,13 +49,13 @@ public class SuiteService {
     public List<SuiteDto> getAllSuites() {
         return suiteRepositoriy.findAll()
                 .stream()
-                .map(suite -> modelMapper.map(suite, SuiteDto.class))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public SuiteDto getSuiteById(Long id) {
         return suiteRepositoriy.findById(id)
-                .map(suite -> modelMapper.map(suite, SuiteDto.class))
+                .map(this::convertToDto)
                 .orElse(null);
     }
 
@@ -67,17 +67,26 @@ public class SuiteService {
             suite.setDisponibilites(suiteDto.getDisponibilites());
             suite.setDescription(suiteDto.getDescription());
             suite.setImageUrl(imageUrl); // Update the image URL
-            Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
-            hotel.ifPresent(suite::setHotel);
+
+            if (suiteDto.getHotel_id() != null) {
+                Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
+                hotel.ifPresent(suite::setHotel);
+            }
 
             suite = suiteRepositoriy.save(suite);
 
-            return modelMapper.map(suite, SuiteDto.class);
+            return convertToDto(suite);
         }
         return null;
     }
 
     public void deleteSuite(Long id) {
         suiteRepositoriy.deleteById(id);
+    }
+
+    private SuiteDto convertToDto(Suite suite) {
+        SuiteDto suiteDto = modelMapper.map(suite, SuiteDto.class);
+        suiteDto.setHotel_id(suite.getHotel() != null ? suite.getHotel().getId_hot() : null);
+        return suiteDto;
     }
 }
