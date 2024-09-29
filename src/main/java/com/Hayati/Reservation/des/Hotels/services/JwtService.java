@@ -44,8 +44,16 @@ public class JwtService {
     public String generateTokenForUser(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getClass().getSimpleName());
-        return buildToken(claims, user, jwtExpiration);
+        return Jwts.builder()
+            .setClaims(claims)
+            .setSubject(user.getEmail())  // Or phone number based on login
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+            .signWith(SignatureAlgorithm.HS256, getSignInKey())
+            .compact();
     }
+    
+    
 
     public long getExpirationTime() {
         return jwtExpiration;
@@ -67,10 +75,15 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    // private boolean isTokenExpired(String token) {
+    //     return extractExpiration(token).before(new Date());
+    // }
+    public boolean isTokenExpired(String token) {
+        Date expirationDate = extractExpiration(token);
+        return expirationDate.before(new Date()); // Checks if the token's expiration date is before the current date
     }
-
+    
+  
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -88,4 +101,6 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    
 }

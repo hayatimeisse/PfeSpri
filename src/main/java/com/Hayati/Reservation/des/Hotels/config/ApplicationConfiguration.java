@@ -23,10 +23,13 @@ public class ApplicationConfiguration {
 
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> {
+            // Chercher l'utilisateur par email ou numéro de téléphone
+            return userRepository.findByEmailOrNumerodetelephone(username, username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        };
     }
-
+    
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

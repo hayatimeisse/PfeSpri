@@ -26,25 +26,30 @@ public class Chambre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id_cham;
 
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false)
     private int capacite;
+    
 
     @Column(nullable = false)
     private float prixJour;
 
     @Column(nullable = false)
-    private String disponibilites;
+    private boolean disponibilites;
+    
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)  // Adjust length based on DB schema change
     private String description;
-
-    @Column(nullable = false)
-    private String imageUrl; 
-
+    
+    @Column(nullable = false, length = 500)  // Adjust length based on DB schema change
+    private String imageUrl;
+    
 
 
     @ManyToOne
     @JoinColumn(name = "suite_id")
     private Suite suite;
+    
 }

@@ -2,111 +2,100 @@ package com.Hayati.Reservation.des.Hotels.controllers;
 
 import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.services.SuiteService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/auth/Suite")
+@RequestMapping("/api/auth/suites")  // Added '/suites' to avoid conflict with other controllers
 public class SuiteController {
 
+    private final SuiteService suiteService;
+
     @Autowired
-    private SuiteService suiteService;
-
-    @PostMapping
-    public ResponseEntity<SuiteDto> createSuite(
-            @RequestPart("suite") String suiteDtoJson,
-            @RequestPart("photo") MultipartFile photo) {
-        try {
-            // Deserialize the Suite DTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            SuiteDto suiteDto = objectMapper.readValue(suiteDtoJson, SuiteDto.class);
-
-            // Handle the file upload
-            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-            String uploadDir = "C:\\Pfe\\Reservation_hotels";
-            File uploadDirFile = new File(uploadDir);
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
-            }
-            Files.copy(photo.getInputStream(), Paths.get(uploadDir + File.separator + fileName), StandardCopyOption.REPLACE_EXISTING);
-
-            // Construct the image URL
-            String imageUrl = "/images/" + fileName;
-
-            // Save the suite information along with the image URL
-            SuiteDto createdSuite = suiteService.createSuite(suiteDto, imageUrl);
-
-            return ResponseEntity.ok(createdSuite);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+    public SuiteController(SuiteService suiteService) {
+        this.suiteService = suiteService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<SuiteDto>> getAllSuites() {
+    // Lister toutes les suites
+    @GetMapping("/list")
+    public ResponseEntity<List<SuiteDto>> listSuites() {
         List<SuiteDto> suites = suiteService.getAllSuites();
         return ResponseEntity.ok(suites);
     }
 
+    // Obtenir une suite par ID
     @GetMapping("/{id}")
     public ResponseEntity<SuiteDto> getSuiteById(@PathVariable Long id) {
-        SuiteDto suite = suiteService.getSuiteById(id);
-        return suite != null ? ResponseEntity.ok(suite) : ResponseEntity.notFound().build();
+        Optional<SuiteDto> suite = suiteService.getSuiteById(id);
+        return suite.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SuiteDto> updateSuite(
-            @PathVariable Long id,
-            @RequestPart("suite") String suiteDtoJson,
-            @RequestPart(value = "photo", required = false) MultipartFile photo) {
+    // Créer une nouvelle suite
+    @PostMapping("/create")
+    public ResponseEntity<?> createSuite(
+            @RequestParam("prixJour") String prixJourStr,
+            @RequestParam("disponibilites") boolean disponibilites,
+            @RequestParam("description") String description,
+            @RequestParam("hotelId") Long hotelId,
+            @RequestParam("photo") MultipartFile photo) {
+
         try {
-            // Deserialize the Suite DTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            SuiteDto suiteDto = objectMapper.readValue(suiteDtoJson, SuiteDto.class);
+            float prixJour = parsePrixJour(prixJourStr);  // Parse the price
+            SuiteDto suiteDto = new SuiteDto()
+                    .setPrixJour(prixJour)
+                    .setDisponibilites(disponibilites)
+                    .setDescription(description)
+                    .setHotel_id(hotelId);
 
-            String imageUrl = null;
-
-            // Handle the file upload if a new photo is provided
-            if (photo != null && !photo.isEmpty()) {
-                String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
-                String uploadDir = "C:\\Pfe\\Reservation_hotels";
-                File uploadDirFile = new File(uploadDir);
-                if (!uploadDirFile.exists()) {
-                    uploadDirFile.mkdirs();
-                }
-                Files.copy(photo.getInputStream(), Paths.get(uploadDir + File.separator + fileName), StandardCopyOption.REPLACE_EXISTING);
-
-                // Construct the image URL
-                imageUrl = "/images/" + fileName;
-            }
-
-            // Update the suite information, with or without a new image URL
-            SuiteDto updatedSuite = suiteService.updateSuite(id, suiteDto, imageUrl);
-
-            return ResponseEntity.ok(updatedSuite);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            SuiteDto createdSuite = suiteService.createSuite(suiteDto, photo);
+            return ResponseEntity.ok(createdSuite);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid price format: " + prixJourStr);
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSuite(@PathVariable Long id) {
+    // Mise à jour d'une suite
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateSuite(
+            @PathVariable Long id,
+            @RequestParam("prixJour") String prixJourStr,
+            @RequestParam("disponibilites") boolean disponibilites,
+            @RequestParam("description") String description,
+            @RequestParam("hotelId") Long hotelId,
+            @RequestParam(value = "photo", required = false) MultipartFile photo) {
+
+        try {
+            float prixJour = parsePrixJour(prixJourStr);  // Parse the price
+
+            SuiteDto suiteDto = new SuiteDto()
+                    .setPrixJour(prixJour)
+                    .setDisponibilites(disponibilites)
+                    .setDescription(description)
+                    .setHotel_id(hotelId);
+
+            SuiteDto updatedSuite = suiteService.updateSuite(id, suiteDto, photo);
+            return ResponseEntity.ok(updatedSuite);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid price format: " + prixJourStr);
+        }
+    }
+
+    // Supprimer une suite
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteSuite(@PathVariable Long id) {
         suiteService.deleteSuite(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Suite deleted successfully.");
+    }
+
+    private float parsePrixJour(String prixJourStr) {
+        // Remove non-numeric characters, assuming input is like "140000MRU/J"
+        String numericPart = prixJourStr.replaceAll("[^0-9.]", "");
+        return Float.parseFloat(numericPart);
     }
 }

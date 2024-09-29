@@ -28,8 +28,14 @@ public class Hotel {
     private String evaluation;
 
     @Column(nullable = false)
-    private String localisation;
+    private Double latitude;
+
     
+    @Column(nullable = false)
+    private Double longitude;
+    
+    @Column(nullable = false)
+    private String description;
 
     @Column(nullable = false)
     private String commentaires;
@@ -63,4 +69,5 @@ public class Hotel {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
 }

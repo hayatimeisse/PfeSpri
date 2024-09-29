@@ -1,88 +1,189 @@
 package com.Hayati.Reservation.des.Hotels.services;
 
 import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
+import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
 import com.Hayati.Reservation.des.Hotels.entity.Chambre;
+import com.Hayati.Reservation.des.Hotels.entity.Hotel;
 import com.Hayati.Reservation.des.Hotels.entity.Suite;
 import com.Hayati.Reservation.des.Hotels.repositoriy.ChambreRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ChambreService {
 
+    private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.61:9001/";
+
     @Autowired
     private ChambreRepositoriy chambreRepositoriy;
 
     @Autowired
-    private SuiteRepositoriy suiteRepositoriy;
+    private SuiteRepositoriy suiteRepositoriy;  // Ajouter le repositoriy pour gérer les suites
 
-    @Autowired
-    private ModelMapper modelMapper;
+    // Créer une nouvelle chambre avec téléchargement d'image et association à une suite
+    public ChambreDto createChambre(ChambreDto chambreDto, MultipartFile photo) {
+        String imageUrl = saveImage(photo, "chambre_photos/");
 
-    public ChambreDto createChambre(ChambreDto chambreDto, String imageUrl) {
-        Chambre chambre = modelMapper.map(chambreDto, Chambre.class);
-    
-        // Vérifiez que l'id de la suite est bien associé
+        Chambre chambre = new Chambre();
+        chambre.setName(chambreDto.getName());
+        chambre.setCapacite(chambreDto.getCapacite());
+        chambre.setPrixJour(chambreDto.getPrixJour());
+        chambre.setDisponibilites(chambreDto.isDisponibilites());
+        chambre.setImageUrl(imageUrl);
+        chambre.setDescription(chambreDto.getDescription());
+
+        // Vérifiez que l'ID de la suite est fourni et associez la suite à la chambre
         if (chambreDto.getSuite_id() != null) {
             Optional<Suite> suite = suiteRepositoriy.findById(chambreDto.getSuite_id());
-            if (suite.isPresent()) {
-                chambre.setSuite(suite.get());
-            } else {
-                throw new RuntimeException("Suite non trouvée avec l'id: " + chambreDto.getSuite_id());
-            }
+            suite.ifPresent(chambre::setSuite);
         }
-    
-        chambre.setImageUrl(imageUrl); // Associe l'URL de l'image
-        chambre = chambreRepositoriy.save(chambre);
-    
-        ChambreDto resultDto = modelMapper.map(chambre, ChambreDto.class);
-        resultDto.setSuite_id(chambre.getSuite() != null ? chambre.getSuite().getId_sui() : null);
-    
-        return resultDto;
+       
+        
+        
+        Chambre savedChambre = chambreRepositoriy.save(chambre);
+
+        return mapToDto(savedChambre);
     }
-    
-    
-    
+
+    // public List<ChambreDto> getChambresByHotelId(Long hotelId) {
+    //     List<Suite> suites = suiteRepositoriy.findByHotelId(hotelId);
+
+    //     if (suites.isEmpty()) {
+    //         throw new RuntimeException("No suites found for the hotel");
+    //     }
+
+    //     List<Long> suiteIds = suites.stream().map(Suite::getId_sui).collect(Collectors.toList());
+
+    //     List<Chambre> chambres = chambreRepositoriy.findBySuite_Id_suiIn(suiteIds);
+
+    //     return chambres.stream()
+    //             .map(this::mapToDto)
+    //             .collect(Collectors.toList());
+    // }
+
+    // Obtenir la liste de toutes les chambres
     public List<ChambreDto> getAllChambres() {
-        return chambreRepositoriy.findAll()
-                .stream()
-                .map(chambre -> modelMapper.map(chambre, ChambreDto.class))
+        return chambreRepositoriy.findAll().stream()
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
-
-    public ChambreDto getChambreById(Long id) {
+  
+  
+  
+    public List<ChambreDto> getChambresByHotelId(Long hotelId) {
+        List<Chambre> chambres = chambreRepositoriy.findByHotelId(hotelId);
+        
+        // Convertir les entités Chambre en DTOs
+        return chambres.stream()
+                .map(chambre -> {
+                    ChambreDto chambreDto = new ChambreDto();
+                    chambreDto.setId_cham(chambre.getId_cham());
+                    chambreDto.setName(chambre.getName());
+                    chambreDto.setImageUrl(chambre.getImageUrl());
+                    chambreDto.setPrixJour(chambre.getPrixJour());
+                    chambreDto.setDisponibilites(chambre.isDisponibilites());
+                    chambreDto.setDescription(chambre.getDescription());
+                    chambreDto.setCapacite(chambre.getCapacite());
+                    return chambreDto;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    // Obtenir une chambre par ID
+    public Optional<ChambreDto> getChambreById(Long id) {
         return chambreRepositoriy.findById(id)
-                .map(chambre -> modelMapper.map(chambre, ChambreDto.class))
-                .orElse(null);
+                .map(this::mapToDto);
     }
+    
 
-    public ChambreDto updateChambre(Long id, ChambreDto chambreDto, String imageUrl) {
-        Optional<Chambre> optionalChambre = chambreRepositoriy.findById(id);
-        if (optionalChambre.isPresent()) {
-            Chambre chambre = optionalChambre.get();
-            chambre.setCapacite(chambreDto.getCapacite());
-            chambre.setPrixJour(chambreDto.getPrixJour());
-            chambre.setDisponibilites(chambreDto.getDisponibilites());
-            chambre.setDescription(chambreDto.getDescription());
-            chambre.setImageUrl(imageUrl); // Update the image URL
+    public ChambreDto updateChambre(Long id, ChambreDto chambreDto, MultipartFile photo) {
+        Optional<Chambre> existingChambreOptional = chambreRepositoriy.findById(id);
+        if (existingChambreOptional.isPresent()) {
+            Chambre existingChambre = existingChambreOptional.get();
 
-            Optional<Suite> suite = suiteRepositoriy.findById(chambreDto.getSuite_id());
-            suite.ifPresent(chambre::setSuite);
+            if (photo != null && !photo.isEmpty()) {
+                String photoPath = saveImage(photo, "chambre_photos/");
+                existingChambre.setImageUrl(photoPath);
+            }
 
-            chambre = chambreRepositoriy.save(chambre);
+            existingChambre.setName(chambreDto.getName());
+            existingChambre.setPrixJour(chambreDto.getPrixJour());
+            existingChambre.setCapacite(chambreDto.getCapacite());
+            existingChambre.setDisponibilites(chambreDto.isDisponibilites());
+            existingChambre.setDescription(chambreDto.getDescription());
 
-            return modelMapper.map(chambre, ChambreDto.class);
+            Chambre updatedChambre = chambreRepositoriy.save(existingChambre);
+            return mapToDto(updatedChambre);
+        } else {
+            throw new RuntimeException("Chambre not found with id: " + id);
         }
-        return null;
+    }
+    // Suppression d'une chambre
+    public void deleteChambre(Long id) {
+        Chambre chambre = chambreRepositoriy.findById(id)
+                .orElseThrow(() -> new RuntimeException("Chambre not found with id: " + id));
+        chambreRepositoriy.delete(chambre);
     }
 
-    public void deleteChambre(Long id) {
-        chambreRepositoriy.deleteById(id);
+    // Fonction pour enregistrer l'image sur le serveur
+    private String saveImage(MultipartFile photo, String subDir) {
+        try {
+            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            Path path = Paths.get(IMAGE_UPLOAD_DIR + subDir + fileName);
+            Files.createDirectories(path.getParent());
+            Files.write(path, photo.getBytes());
+            return subDir + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image", e);
+        }
+    }
+    private ChambreDto convertToDto(Chambre chambre) {
+        ChambreDto chambreDto = new ChambreDto();
+        chambreDto.setName(chambre.getName());
+        chambreDto.setPrixJour(chambre.getPrixJour());
+        chambreDto.setDisponibilites(chambre.isDisponibilites());
+        chambreDto.setDescription(chambre.getDescription());
+        // Set other fields as needed
+        return chambreDto;
+    }
+    
+
+    private ChambreDto mapToDto(Chambre chambre) {
+        ChambreDto chambreDto = new ChambreDto();
+        chambreDto.setId_cham(chambre.getId_cham());
+        chambreDto.setName(chambre.getName());
+        chambreDto.setCapacite(chambre.getCapacite());
+        chambreDto.setPrixJour(chambre.getPrixJour());
+        chambreDto.setDisponibilites(chambre.isDisponibilites());
+        chambreDto.setDescription(chambre.getDescription());
+
+        // Associe l'ID de la suite à la DTO
+        chambreDto.setSuite_id(chambre.getSuite() != null ? chambre.getSuite().getId_sui() : null);
+
+        // Formatage correct de l'URL de l'image
+        String imageUrl = chambre.getImageUrl();
+        if (imageUrl != null && !imageUrl.startsWith("http")) {
+            imageUrl = BASE_IMAGE_URL + imageUrl;
+        }
+        chambreDto.setImageUrl(imageUrl);
+
+        return chambreDto;
+    }
+   
+    
+    public long getChambreCount() {
+        return chambreRepositoriy.count();
     }
 }

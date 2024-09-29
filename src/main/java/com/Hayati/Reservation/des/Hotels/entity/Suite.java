@@ -25,14 +25,14 @@ public class Suite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_sui;
-
+    @Column(name = "id_sui")  // Ensure column name matches with the database
+    private Long id_sui;
 
     @Column(nullable = false)
     private float prixJour;
 
     @Column(nullable = false)
-    private String disponibilites;
+    private boolean disponibilites;
 
     @Column(nullable = false)
     private String description;
