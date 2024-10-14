@@ -18,7 +18,6 @@ public class HotelDto {
     private String notifications;
     private String imageUrl;
     private String description;
-    private Set<Long> servicesIds;  // Set to hold service IDs associated with the hotel
     
     // Chaining setters for fluent usage
     public HotelDto setId_hot(long id_hot) {
@@ -71,10 +70,6 @@ public class HotelDto {
         return this;
     }
 
-    public HotelDto setServicesIds(Set<Long> servicesIds) {
-        this.servicesIds = servicesIds;
-        return this;
-    }
 
     // Getters (standard getters for the DTO fields)
     public long getId_hot() {
@@ -117,7 +112,4 @@ public class HotelDto {
         return description;
     }
 
-    public Set<Long> getServicesIds() {
-        return servicesIds;
-    }
 }

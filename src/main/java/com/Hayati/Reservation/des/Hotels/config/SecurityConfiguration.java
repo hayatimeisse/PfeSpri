@@ -38,7 +38,8 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Autoriser l'accès à Swagger
                 .requestMatchers("/hotel_photos/**").permitAll()
-                .requestMatchers("/chambre_photos/**").permitAll() // Autoriser l'accès à toutes les images
+                .requestMatchers("/chambre_photos/**").permitAll()
+                .requestMatchers("/client_photos/**").permitAll() // Autoriser l'accès à toutes les images
                 .requestMatchers("/api/auth/**").permitAll() // Autoriser les routes d'authentification
                 .anyRequest().authenticated()  // Exiger une authentification pour les autres routes
             )
@@ -55,14 +56,15 @@ public class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:51130"));  // Adjust the Flutter app's port
+        configuration.setAllowedOrigins(List.of("http://localhost:9000"));  // Autoriser tous les ports locaux
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    
     
 
     @Bean

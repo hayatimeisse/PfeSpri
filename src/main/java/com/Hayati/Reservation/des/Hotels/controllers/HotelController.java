@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Optional;
-
+@CrossOrigin(origins = "http://localhost:9000")
 @RestController
 @RequestMapping("/api/auth")
 public class HotelController {
@@ -49,21 +49,17 @@ public ResponseEntity<List<HotelDto>> listHotels(@RequestParam(value = "search",
     
 
     // Obtenir un hôtel par ID
-    @GetMapping("/{id}")
+    @GetMapping("/hotels/{id}")
     public ResponseEntity<HotelDto> getHotelById(@PathVariable Long id) {
         Optional<HotelDto> hotel = hotelService.getHotelById(id);
-
+    
         if (hotel.isPresent()) {
-            HotelDto h = hotel.get();
-            if (h.getImageUrl() != null && !h.getImageUrl().isEmpty()) {
-                String imageUrl = "http://localhost:9000/" + h.getImageUrl();
-                h.setImageUrl(imageUrl);
-            }
-            return ResponseEntity.ok(h);
+            return ResponseEntity.ok(hotel.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+    
 
     // Supprimer un hôtel
     @DeleteMapping("/delete/{id}")

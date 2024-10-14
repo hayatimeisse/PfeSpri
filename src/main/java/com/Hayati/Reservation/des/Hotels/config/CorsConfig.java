@@ -36,8 +36,11 @@ public class CorsConfig implements WebMvcConfigurer {
         // Expose the "chambre_photos" directory so it is publicly accessible via a URL
         registry.addResourceHandler("/chambre_photos/**")
                 .addResourceLocations("file:///C:/Pfe/Reservation_hotels/chambre_photos/")
-                .setCachePeriod(3600);  // Optional: Cache for one hour
-    }
+                .setCachePeriod(3600); 
+                
+                registry.addResourceHandler("/client_photos/**")
+                .addResourceLocations("file:///C:/Pfe/Reservation_hotels/client_photos/")
+                .setCachePeriod(3600);    }
     
     
 }

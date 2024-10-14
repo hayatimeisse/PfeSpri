@@ -4,6 +4,7 @@ public class LoginResponse {
     private String token;
     private long expiresIn;
     private String userType;
+    private Object userData;
 
     public String getToken() {
         return token;
@@ -32,12 +33,22 @@ public class LoginResponse {
         return this;
     }
 
+    public Object getUserData() {
+        return userData;
+    }
+
+    public LoginResponse setUserData(Object userData) {
+        this.userData = userData;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "LoginResponse{" +
                 "token='" + token + '\'' +
                 ", expiresIn=" + expiresIn +
                 ", userType='" + userType + '\'' +
+                ", userData=" + userData +
                 '}';
     }
 }

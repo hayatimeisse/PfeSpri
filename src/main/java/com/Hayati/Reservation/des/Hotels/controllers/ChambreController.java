@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +28,26 @@ public class ChambreController {
         this.chambreService = chambreService;
     }
 
-    // Lister toutes les chambres
     @GetMapping("/list")
-    public ResponseEntity<List<ChambreDto>> listChambres() {
-        List<ChambreDto> chambres = chambreService.getAllChambres();
-        
-       
-        
-        return ResponseEntity.ok(chambres);
+public ResponseEntity<List<ChambreDto>> listChambres(@RequestParam(value = "search", required = false) String search) {
+    List<ChambreDto> chambres = chambreService.getAllChambres();
+
+    // Filter rooms based on the search query
+    if (search != null && !search.isEmpty()) {
+        chambres = chambres.stream()
+                .filter(chambre -> chambre.getName().toLowerCase().contains(search.toLowerCase()))
+                .collect(Collectors.toList());
     }
+
+    chambres.forEach(chambre -> {
+        if (chambre.getImageUrl() != null && !chambre.getImageUrl().startsWith("http")) {
+            chambre.setImageUrl("http://localhost:9001/" + chambre.getImageUrl());
+        }
+    });
+
+    return ResponseEntity.ok(chambres);
+}
+
     
 
     // Obtenir une chambre par ID

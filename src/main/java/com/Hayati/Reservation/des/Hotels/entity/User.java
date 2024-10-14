@@ -12,18 +12,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
-public class User implements UserDetails {
+public abstract class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_user")
-    private long id_user;
+    @Column(name = "id")  // Gardez 'id' comme nom de colonne
+    private long id;
 
     @Column(nullable = false)
     private String name;
@@ -37,19 +39,14 @@ public class User implements UserDetails {
     private String password;
 
     @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits")
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String numerodetelephone;
+    
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"),
-        inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id_role")
-    )
-    private Set<Role> roles;
-
-    @Column(name = "image_url")
-    private String imageUrl;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<String> roles = new HashSet<>();
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -59,9 +56,46 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    // Méthodes pour obtenir les rôles
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
+    // Méthode pour ajouter un rôle
+    public void addRole(String role) {
+        roles.add(role);
+    }
+
+    // Setters en chaîne (facultatif)
+    public User setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public User setEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public User setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public User setNumerodetelephone(String numerodetelephone) {
+        this.numerodetelephone = numerodetelephone;
+        return this;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return roles.stream()
+                .map(role -> (GrantedAuthority) () -> role)
+                .collect(Collectors.toSet());
     }
 
     @Override

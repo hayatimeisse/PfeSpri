@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class SuiteService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://172.20.10.2:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.61:9001/";
 
     @Autowired
     private SuiteRepositoriy suiteRepositoriy;

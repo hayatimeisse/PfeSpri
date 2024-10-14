@@ -2,37 +2,32 @@ package com.Hayati.Reservation.des.Hotels.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    // @Override
-    // public void addCorsMappings(CorsRegistry registry) {
-    //     registry.addMapping("/**")
-    //             .allowedOrigins("http://192.168.100.6:58758")
-    //             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-    //             .allowedHeaders("*")
-    //             .allowCredentials(false);  // Activez cette option si vous utilisez des cookies ou des tokens d'authentification
-    // }
+
     @Override
-public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
-            .allowedOrigins("*") // Ou spécifiez l'origine de votre app
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedHeaders("*")
-            .allowCredentials(false);
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")  // Remplacez par l'origine de votre application Flutter Web
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(false);
+    }
 }
 
+
+// @Override
+// public void addCorsMappings(CorsRegistry registry) {
+//     registry.addMapping("/api/**") // Ajustez cette ligne pour correspondre à vos endpoints
+//             .allowedOrigins("http://localhost:56852") // Remplacez par l'origine de votre application Flutter
+//             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+//             .allowedHeaders("*")
+//             .allowCredentials(false); // Si vous avez besoin d'autoriser les cookies ou sessions
+// }
     
-    
-}
+
 
 
 

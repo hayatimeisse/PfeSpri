@@ -1,5 +1,6 @@
 package com.Hayati.Reservation.des.Hotels.controllers;
 
+import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.services.SuiteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,21 @@ public class SuiteController {
         this.suiteService = suiteService;
     }
 
-    // Lister toutes les suites
-    @GetMapping("/list")
-    public ResponseEntity<List<SuiteDto>> listSuites() {
-        List<SuiteDto> suites = suiteService.getAllSuites();
-        return ResponseEntity.ok(suites);
-    }
+     @GetMapping("/list")
+public ResponseEntity<List<SuiteDto>> listSuites(@RequestParam(value = "search", required = false) String search) {
+    List<SuiteDto> suites = suiteService.getAllSuites();
+
+    // Filter rooms based on the search query
+ 
+
+    suites.forEach(suite -> {
+        if (suite.getImageUrl() != null && !suite.getImageUrl().startsWith("http")) {
+            suite.setImageUrl("http://localhost:9001/" + suite.getImageUrl());
+        }
+    });
+
+    return ResponseEntity.ok(suites);
+}
 
     // Obtenir une suite par ID
     @GetMapping("/{id}")

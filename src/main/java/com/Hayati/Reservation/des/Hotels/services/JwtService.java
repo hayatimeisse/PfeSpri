@@ -5,11 +5,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import com.Hayati.Reservation.des.Hotels.entity.User;
+import java.util.List;
 
+import java.util.stream.Collectors;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,39 +36,34 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .collect(Collectors.toList());
+        extraClaims.put("roles", roles);
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
-    public String generateTokenForUser(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getClass().getSimpleName());
-        return Jwts.builder()
-            .setClaims(claims)
-            .setSubject(user.getEmail())  // Or phone number based on login
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-            .signWith(SignatureAlgorithm.HS256, getSignInKey())
-            .compact();
-    }
-    
-    
-
     public long getExpirationTime() {
         return jwtExpiration;
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String buildToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails,
+            long expiration
+    ) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SignatureAlgorithm.HS256, getSignInKey())
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -75,20 +72,15 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    // private boolean isTokenExpired(String token) {
-    //     return extractExpiration(token).before(new Date());
-    // }
-    public boolean isTokenExpired(String token) {
-        Date expirationDate = extractExpiration(token);
-        return expirationDate.before(new Date()); // Checks if the token's expiration date is before the current date
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
     }
-    
-  
+
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -101,6 +93,4 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-    
 }
