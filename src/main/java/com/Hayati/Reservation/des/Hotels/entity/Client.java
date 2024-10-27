@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter
-@Setter
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +21,16 @@ public class Client extends User {
 
     @Column(nullable = false)
     private String photo;
+    @Column(nullable = false)
+    private boolean isEmailVerified = false;
 
-    // Ensure that 'id' from User is inherited and mapped correctly
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
+
+    public Client setIsEmailVerified(boolean isEmailVerified) {
+        this.isEmailVerified = isEmailVerified;
+        return this;
+    }
     @Override
     public Client setName(String name) {
         super.setName(name);

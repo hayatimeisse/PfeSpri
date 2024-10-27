@@ -29,10 +29,9 @@ public class ClientService {
 
     // Directory path to save client's files (photos)
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_client/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
 
-    // Base URL for accessing images
-    private final String BASE_IMAGE_URL = "http://localhost:9001/";
-
+    
     // Méthode pour sauvegarder les fichiers clients
     private String saveImage(MultipartFile photo, String subDir) {
         try {

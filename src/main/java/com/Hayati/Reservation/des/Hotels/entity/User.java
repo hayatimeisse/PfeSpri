@@ -3,6 +3,7 @@ package com.Hayati.Reservation.des.Hotels.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -26,17 +27,28 @@ public abstract class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")  // Gardez 'id' comme nom de colonne
     private long id;
-
+    @Column(nullable = false)
+    private boolean isEmailVerified = false;
     @Column(nullable = false)
     private String name;
 
-    @Email
-    @Pattern(regexp = "^[\\w-\\.]+@gmail\\.com$", message = "Email should be a valid gmail address")
-    @Column(nullable = false, unique = true)
-    private String email;
+@Email(message = "Veuillez fournir une adresse email valide")
+@Pattern(regexp = "^[\\w-\\.]+@gmail\\.com$", message = "L'email doit être une adresse Gmail valide")
+@Size(max = 254, message = "L'email ne peut pas dépasser 254 caractères")
+@Column(nullable = false, unique = true)
+private String email;
+
+
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
 
     @Column(nullable = false)
     private String password;
+  ;
+
+    @Column(name = "is_enabled")
+    private Boolean isEnabled;
+
 
     @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits")
     @Column(nullable = true, unique = true)
@@ -125,6 +137,11 @@ public abstract class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEmailVerified;  // Le compte est activé uniquement après la vérification de l'email
+    }
+
+    // Générer le code de vérification
+    public void generateVerificationCode() {
+        this.verificationCode = java.util.UUID.randomUUID().toString();
     }
 }

@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 public class HotelService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.61:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
     
     @Autowired
     private HotelRepositoriy hotelRepositoriy;
-
+   
     // Créer un nouvel hôtel avec téléchargement d'image
     public HotelDto createHotel(HotelDto hotelDto, MultipartFile photo) {
         String imageUrl = saveImage(photo, "hotel_photos/");

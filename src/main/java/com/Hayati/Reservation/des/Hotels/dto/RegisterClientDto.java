@@ -3,17 +3,13 @@ package com.Hayati.Reservation.des.Hotels.dto;
 import org.springframework.web.multipart.MultipartFile;
 
 public class RegisterClientDto {
-     private String email;
+    private String email;
     private String password;
     private String nom;
-    private String numerodetelephone;
     private MultipartFile photo;
-
-  
-
-
-
-
+    private String numerodetelephone;
+    private boolean isEmailVerified = true; 
+    // Getters and setters for all fields
     public String getEmail() {
         return email;
     }
@@ -41,17 +37,6 @@ public class RegisterClientDto {
         return this;
     }
 
-    public String getNumerodetelephone() {
-        return numerodetelephone;
-    }
-
-    public RegisterClientDto setNumerodetelephone(String numerodetelephone) {
-        this.numerodetelephone = numerodetelephone;
-        return this;
-    }
-
-  
-
     public MultipartFile getPhoto() {
         return photo;
     }
@@ -61,6 +46,21 @@ public class RegisterClientDto {
         return this;
     }
 
+    public String getNumerodetelephone() {
+        return numerodetelephone;
+    }
 
+    public RegisterClientDto setNumerodetelephone(String numerodetelephone) {
+        this.numerodetelephone = numerodetelephone;
+        return this;
+    }
 
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public RegisterClientDto setEmailVerified(boolean isEmailVerified) {
+        this.isEmailVerified = isEmailVerified;
+        return this;
+    }
 }

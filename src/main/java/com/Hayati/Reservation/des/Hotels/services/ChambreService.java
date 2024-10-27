@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ChambreService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.61:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
 
     @Autowired
     private ChambreRepositoriy chambreRepositoriy;
@@ -136,7 +136,7 @@ public class ChambreService {
                 .orElseThrow(() -> new RuntimeException("Chambre not found with id: " + id));
         chambreRepositoriy.delete(chambre);
     }
-
+  
     // Fonction pour enregistrer l'image sur le serveur
     private String saveImage(MultipartFile photo, String subDir) {
         try {

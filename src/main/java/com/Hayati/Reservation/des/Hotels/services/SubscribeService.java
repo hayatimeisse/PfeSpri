@@ -28,23 +28,22 @@ public class SubscribeService {
     private PasswordEncoder passwordEncoder;
 
     // Directory path to save client's files (photos)
-    private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_Subscribe/";
+    private final String BASE_IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_Subscribe/";
 
     // Base URL for accessing images
     private final String BASE_IMAGE_URL = "http://localhost:9001/";
-
-    // Méthode pour sauvegarder les fichiers clients
-    private String saveImage(MultipartFile photo, String subDir) {
+    private String saveImageSubscribe(MultipartFile photo, String subDir) {
         try {
             String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-            Path path = Paths.get(IMAGE_UPLOAD_DIR + subDir + fileName);
-            Files.createDirectories(path.getParent()); // Crée le répertoire si nécessaire
+            Path path = Paths.get(BASE_IMAGE_UPLOAD_DIR + subDir + fileName);
+            Files.createDirectories(path.getParent());
             Files.write(path, photo.getBytes());
-            return subDir + fileName;  // Retourner le chemin relatif
+            return subDir + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Échec de l'enregistrement de l'image", e);
         }
     }
+    
 
     // Méthode de création d'un client avec téléchargement de photo
     public Subscribe createSubscribe(RegisterSubscribeDto input) {
@@ -78,7 +77,7 @@ public class SubscribeService {
         return subscribeRepository.findById(id).map(existingSubscribe -> {
             // If there's a new photo, update it
             if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
-                String photoPath = saveImage(input.getPhoto(), "subscribe_photos/");
+                String photoPath = saveImageSubscribe(input.getPhoto(), "subscribe_photos/");
                 existingSubscribe.setPhoto(photoPath);
             }
 

@@ -26,6 +26,10 @@ public class ChambreController {
     @Autowired
     public ChambreController(ChambreService chambreService) {
         this.chambreService = chambreService;
+    } @GetMapping("/count")
+    public ResponseEntity<Long> getCountOfChambress() {
+        long count = chambreService.getChambreCount();
+        return ResponseEntity.ok(count);
     }
 
     @GetMapping("/list")
@@ -70,7 +74,7 @@ public ResponseEntity<List<ChambreDto>> getRoomsByHotelId(@PathVariable Long hot
 
     chambres.forEach(chambre -> {
         if (chambre.getImageUrl() != null && !chambre.getImageUrl().startsWith("http")) {
-            chambre.setImageUrl("http://172.20.10.2:9001/" + chambre.getImageUrl());  // Assurez-vous que cette URL est correcte
+            chambre.setImageUrl("http://192.168.100.4:9001/" + chambre.getImageUrl());  // Assurez-vous que cette URL est correcte
         }
     });
 

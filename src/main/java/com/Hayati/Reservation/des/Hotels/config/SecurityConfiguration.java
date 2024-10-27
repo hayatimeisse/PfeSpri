@@ -39,6 +39,9 @@ public class SecurityConfiguration {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Autoriser l'accès à Swagger
                 .requestMatchers("/hotel_photos/**").permitAll()
                 .requestMatchers("/chambre_photos/**").permitAll()
+                .requestMatchers("/suite_photos/**").permitAll()
+                .requestMatchers("/subscribe_photos/**").permitAll()
+
                 .requestMatchers("/client_photos/**").permitAll() // Autoriser l'accès à toutes les images
                 .requestMatchers("/api/auth/**").permitAll() // Autoriser les routes d'authentification
                 .anyRequest().authenticated()  // Exiger une authentification pour les autres routes

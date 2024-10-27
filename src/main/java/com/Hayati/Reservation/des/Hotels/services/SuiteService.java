@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class SuiteService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.61:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
 
     @Autowired
     private SuiteRepositoriy suiteRepositoriy;
@@ -77,7 +77,7 @@ public class SuiteService {
             existingSuite.setDisponibilites(suiteDto.isDisponibilites());
             existingSuite.setDescription(suiteDto.getDescription());
 
-            // Mise à jour de l'hôtel associé, si `hotel_id` est fourni
+            // Mise à jour de l'hôtel associé, si hotel_id est fourni
             if (suiteDto.getHotel_id() != null) {
                 Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
                 hotel.ifPresent(existingSuite::setHotel);
@@ -110,6 +110,7 @@ public class SuiteService {
         }
     }
 
+    // Mapper une entité Suite vers un DTO SuiteDto
     private SuiteDto mapToDto(Suite suite) {
         SuiteDto suiteDto = new SuiteDto();
         suiteDto.setId_sui(suite.getId_sui());

@@ -1,11 +1,6 @@
 package com.Hayati.Reservation.des.Hotels.controllers;
 
-import com.Hayati.Reservation.des.Hotels.dto.LoginUserDto;
-import com.Hayati.Reservation.des.Hotels.dto.RegisterAdminDto;
-import com.Hayati.Reservation.des.Hotels.dto.RegisterClientDto;
-import com.Hayati.Reservation.des.Hotels.dto.RegisterSubscribeDto;
-import com.Hayati.Reservation.des.Hotels.dto.RegisterUserDto;
-import com.Hayati.Reservation.des.Hotels.dto.UserProfileUpdateRequest;
+import com.Hayati.Reservation.des.Hotels.dto.*;
 import com.Hayati.Reservation.des.Hotels.entity.Client;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.entity.User;
@@ -13,35 +8,19 @@ import com.Hayati.Reservation.des.Hotels.responses.ChangePasswordRequest;
 import com.Hayati.Reservation.des.Hotels.responses.LoginResponse;
 import com.Hayati.Reservation.des.Hotels.services.AuthenticationService;
 import com.Hayati.Reservation.des.Hotels.services.JwtService;
-import com.Hayati.Reservation.des.Hotels.services.UserService;
+import com.Hayati.Reservation.des.Hotels.repositoriy.ClientRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 
-import io.jsonwebtoken.Claims;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-@RequestMapping("/api/auth")
 @RestController
+@RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthenticationController {
-
-   
- 
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
@@ -51,77 +30,63 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-
-
-    @PostMapping("signup/client")
+    @Autowired
+    private ClientRepository clientRepository;
+    @PostMapping("/signup/client")
     public ResponseEntity<?> signupClient(
-        @RequestParam("email") String email,
-        @RequestParam("password") String password,
-        @RequestParam("nom") String nom,
-        @RequestParam("photo") MultipartFile photo,  // Make sure this is passed as a file
-        @RequestParam("numerodetelephone") String numerodetelephone) {
-    
-        // Log incoming parameters for debugging
-        System.out.println("Email: " + email);
-        System.out.println("Password: " + password);
-        System.out.println("Name: " + nom);
-        System.out.println("Phone: " + numerodetelephone);
-        System.out.println("Photo: " + (photo != null ? photo.getOriginalFilename() : "No Photo"));
-    
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("nom") String nom,
+            @RequestParam("photo") MultipartFile photo,
+            @RequestParam("numerodetelephone") String numerodetelephone) {
+
         if (photo == null || photo.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo is required");
         }
-    
-        // Continue with registration
+
         RegisterClientDto registerClientDto = new RegisterClientDto()
                 .setEmail(email)
                 .setPassword(password)
                 .setNom(nom)
                 .setPhoto(photo)
                 .setNumerodetelephone(numerodetelephone);
-    
+
         Client createdClient = authenticationService.signupClient(registerClientDto);
         if (createdClient != null && createdClient.getPhoto() != null) {
             String imageUrl = "http://localhost:9001/" + createdClient.getPhoto();
             createdClient.setPhoto(imageUrl);
         }
-    
+
         return ResponseEntity.ok(createdClient);
     }
 
-
-    @PostMapping("signup/subscribe")
+    @PostMapping("/signup/subscribe")
     public ResponseEntity<?> signupSubscribe(
-        @RequestParam("email") String email,
-        @RequestParam("password") String password,
-        @RequestParam("nom") String nom,
-        @RequestParam("photo") MultipartFile photo ) {
-    
-        System.out.println("Email: " + email);
-        System.out.println("Password: " + password);
-        System.out.println("Name: " + nom);
-        System.out.println("Photo: " + (photo != null ? photo.getOriginalFilename() : "No Photo"));
-    
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("nom") String nom,
+            @RequestParam("photo") MultipartFile photo) {
+
         if (photo == null || photo.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo is required");
         }
-    
+
         RegisterSubscribeDto registerSubscribeDto = new RegisterSubscribeDto()
                 .setEmail(email)
                 .setPassword(password)
                 .setNom(nom)
                 .setPhoto(photo);
-    
-                Subscribe createdSubscribe = authenticationService.signupSubscribe(registerSubscribeDto);
+
+        Subscribe createdSubscribe = authenticationService.signupSubscribe(registerSubscribeDto);
         if (createdSubscribe != null && createdSubscribe.getPhoto() != null) {
             String imageUrl = "http://localhost:9001/" + createdSubscribe.getPhoto();
             createdSubscribe.setPhoto(imageUrl);
         }
-    
+
         return ResponseEntity.ok(createdSubscribe);
     }
-    
-     @PostMapping("/signup/admin")
+
+    @PostMapping("/signup/admin")
     public ResponseEntity<User> registerAdmin(@RequestBody RegisterAdminDto registerAdminDto) {
         User registeredAdmin = authenticationService.signupAdmin(registerAdminDto);
         return ResponseEntity.ok(registeredAdmin);
@@ -132,7 +97,51 @@ public class AuthenticationController {
         LoginResponse response = authenticationService.authenticate(loginUserDto);
         return ResponseEntity.ok(response);
     }
-    
+    @PostMapping("/verify")
+public ResponseEntity<?> verifyEmail(@RequestParam("code") String verificationCode) {
+    Optional<Client> client = clientRepository.findByVerificationCode(verificationCode);
 
+    if (client.isPresent()) {
+        Client existingClient = client.get();
+        existingClient.setIsEmailVerified(true);
+        existingClient.setVerificationCode(null); // Clear the code after verification
+        clientRepository.save(existingClient);
+        return ResponseEntity.ok("Email verified successfully!");
+    } else {
+        return ResponseEntity.badRequest().body("Invalid verification code.");
+    }
+}
+ @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ChangePasswordRequest changePasswordRequest) {
+
+        // Extraire le token si besoin (le supprimer du préfixe 'Bearer ')
+        String extractedToken = token.substring(7); // Enlever 'Bearer ' du token
+
+        // Récupérer l'utilisateur depuis le token
+        User user = authenticationService.getUserFromToken(extractedToken);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non trouvé");
+        }
+
+        // Vérifier que l'ancien mot de passe est correct
+        boolean isOldPasswordValid = authenticationService.checkPassword(user, changePasswordRequest.getOldPassword());
+
+        if (!isOldPasswordValid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'ancien mot de passe est incorrect");
+        }
+
+        // Vérifier que le nouveau mot de passe et la confirmation correspondent
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Les mots de passe ne correspondent pas");
+        }
+
+        // Changer le mot de passe
+        authenticationService.updatePassword(user, changePasswordRequest.getNewPassword());
+
+        return ResponseEntity.ok("Mot de passe changé avec succès");
+    }
 
 }
