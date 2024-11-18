@@ -2,11 +2,14 @@ package com.Hayati.Reservation.des.Hotels.dto;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.Hayati.Reservation.des.Hotels.enumeration.Status;
+
 public class RegisterSubscribeDto {
     private String email;
     private String password;
     private String nom;
     private MultipartFile photo;
+    private Status status;
 
     public MultipartFile getPhoto() {
         return photo;
@@ -14,6 +17,14 @@ public class RegisterSubscribeDto {
 
     public RegisterSubscribeDto setPhoto(MultipartFile photo) {
         this.photo = photo;
+        return this;
+    }
+    public Status getStatus() {
+        return status;
+    }
+
+    public RegisterSubscribeDto setStatus(Status status) {
+        this.status = status;
         return this;
     }
     public String getEmail() {

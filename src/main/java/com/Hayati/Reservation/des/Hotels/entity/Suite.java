@@ -15,6 +15,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,12 +43,14 @@ public class Suite {
     @Column(nullable = false)
     private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "hotel_id")
+     @ManyToOne
+    @JsonBackReference
     private Hotel hotel;
 
-    @OneToMany(mappedBy = "suite")
+    // @OneToMany(mappedBy = "suite")
+    // private Set<Chambre> chambres;
+  @OneToMany(mappedBy = "suite")
+    @JsonManagedReference
     private Set<Chambre> chambres;
-
    
 }

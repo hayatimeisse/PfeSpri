@@ -74,7 +74,7 @@ public ResponseEntity<List<ChambreDto>> getRoomsByHotelId(@PathVariable Long hot
 
     chambres.forEach(chambre -> {
         if (chambre.getImageUrl() != null && !chambre.getImageUrl().startsWith("http")) {
-            chambre.setImageUrl("http://192.168.100.4:9001/" + chambre.getImageUrl());  // Assurez-vous que cette URL est correcte
+            chambre.setImageUrl("http://192.168.100.197:9001/" + chambre.getImageUrl());  // Assurez-vous que cette URL est correcte
         }
     });
 
@@ -168,7 +168,7 @@ public ResponseEntity<?> createChambre(
     
         // Update image URL if it exists
         if (updatedChambre != null && updatedChambre.getImageUrl() != null) {
-            String imageUrl = "http://172.20.10.2:9001/" + updatedChambre.getImageUrl();
+            String imageUrl = "http://192.168.100.197:9001/" + updatedChambre.getImageUrl();
             updatedChambre.setImageUrl(imageUrl);
         }
     

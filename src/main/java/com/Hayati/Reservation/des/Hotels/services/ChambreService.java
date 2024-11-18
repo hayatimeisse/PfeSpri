@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ChambreService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.174:9001/";
 
     @Autowired
     private ChambreRepositoriy chambreRepositoriy;

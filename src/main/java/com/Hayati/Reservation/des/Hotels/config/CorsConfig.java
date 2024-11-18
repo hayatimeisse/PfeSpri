@@ -39,10 +39,10 @@ public class CorsConfig implements WebMvcConfigurer {
                 .setCachePeriod(3600); 
                 
                 registry.addResourceHandler("/client_photos/**")
-                .addResourceLocations("file:///C:/Pfe/Reservation_client/client_photos/")
+                .addResourceLocations("file:///C:/Pfe/Reservation_Client/client_photos/")
                 .setCachePeriod(3600); 
                 registry.addResourceHandler("/subscribe_photos/**")
-                .addResourceLocations("file:///C:/Pfe/Reservation_client/subscribe_photos/")
+                .addResourceLocations("file:///C:/Pfe/Reservation_Subscribe/subscribe_photos/")
                 .setCachePeriod(3600);   
                 registry.addResourceHandler("/suite_photos/**")
                 .addResourceLocations("file:///C:/Pfe/Reservation_hotels/suite_photos/")

@@ -18,6 +18,3 @@ public interface ChambreRepositoriy extends JpaRepository<Chambre, Long> {
     @Query("SELECT c FROM Chambre c WHERE c.suite.hotel.id_hot = :hotelId")
     List<Chambre> findByHotelId(@Param("hotelId") Long hotelId);
 }
-
-
-

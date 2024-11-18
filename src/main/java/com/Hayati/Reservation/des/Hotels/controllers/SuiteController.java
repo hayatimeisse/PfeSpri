@@ -3,6 +3,8 @@ package com.Hayati.Reservation.des.Hotels.controllers;
 import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
 import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
+import com.Hayati.Reservation.des.Hotels.entity.Suite;
+import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
 import com.Hayati.Reservation.des.Hotels.services.SuiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +23,12 @@ public class SuiteController {
 
     @Autowired
     public SuiteController(SuiteService suiteService) {
-        this.suiteService = suiteService;
+        this.suiteService = suiteService; // Initialize suiteService
+    }
+
+    @GetMapping("/hotel/{hotelId}/subscribe/{subscribeId}")
+    public List<Suite> getSuitesByHotelAndSubscribe(@PathVariable Long hotelId, @PathVariable Long subscribeId) {
+        return suiteService.getSuitesByHotelAndSubscribe(hotelId, subscribeId);
     }
 
     @GetMapping("/list")
@@ -122,7 +129,7 @@ public class SuiteController {
         return ResponseEntity.ok(updatedSuite);  // Retourner la réponse mise à jour
     }
     
-  
+   
 
     // Supprimer une suite
     @DeleteMapping("/delete/{id}")
@@ -141,4 +148,5 @@ public class SuiteController {
         long count = suiteService.getSuiteCount();
         return ResponseEntity.ok(count);
     }
+
 }

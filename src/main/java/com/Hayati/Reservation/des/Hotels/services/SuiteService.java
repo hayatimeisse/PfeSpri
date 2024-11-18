@@ -23,11 +23,27 @@ public class SuiteService {
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
     private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
 
-    @Autowired
-    private SuiteRepositoriy suiteRepositoriy;
+  
 
     @Autowired
     private HotelRepositoriy hotelRepositoriy;
+    private final SuiteRepositoriy suiteRepositoriy;
+
+    @Autowired
+    public SuiteService(SuiteRepositoriy suiteRepositoriy) {
+        this.suiteRepositoriy = suiteRepositoriy; // Initialize suiteRepositoriy
+    }
+    // public List<SuiteDto> getSuitesByHotelAndSubscribe(Long hotelId, Long subscribeId) {
+    //     List<Suite> suites = SuiteRepositoriy.findByHotelIdAndSubscribeId(hotelId, subscribeId);
+    //     return suites.stream()
+    //                  .map(suite -> new SuiteDto(suite.getId_sui(), suite.getDescription(), suite.isDisponibilites(), suite.getImageUrl(), suite.getPrixJour()))
+    //                  .collect(Collectors.toList());
+    // }
+    
+
+    public List<Suite> getSuitesByHotelAndSubscribe(Long hotelId, Long subscribeId) {
+        return suiteRepositoriy.findByHotelIdAndSubscribeId(hotelId, subscribeId);
+    }
 
     // Créer une nouvelle suite avec téléchargement d'image et association à un hôtel
     public SuiteDto createSuite(SuiteDto suiteDto, MultipartFile photo) {
@@ -109,7 +125,8 @@ public class SuiteService {
             throw new RuntimeException("Failed to store image", e);
         }
     }
-
+    
+  
     // Mapper une entité Suite vers un DTO SuiteDto
     private SuiteDto mapToDto(Suite suite) {
         SuiteDto suiteDto = new SuiteDto();

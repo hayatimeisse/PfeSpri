@@ -7,6 +7,11 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import com.Hayati.Reservation.des.Hotels.services.JwtService;
+
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.client.RestTemplate;
@@ -20,14 +25,20 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     public SecurityConfiguration(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
+            JwtService jwtService,
+            UserDetailsService userDetailsService,
+            AuthenticationProvider authenticationProvider,
+            HandlerExceptionResolver handlerExceptionResolver
     ) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
         this.authenticationProvider = authenticationProvider;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Bean
@@ -36,30 +47,28 @@ public class SecurityConfiguration {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Autoriser l'accès à Swagger
-                .requestMatchers("/hotel_photos/**").permitAll()
-                .requestMatchers("/chambre_photos/**").permitAll()
-                .requestMatchers("/suite_photos/**").permitAll()
-                .requestMatchers("/subscribe_photos/**").permitAll()
-
-                .requestMatchers("/client_photos/**").permitAll() // Autoriser l'accès à toutes les images
-                .requestMatchers("/api/auth/**").permitAll() // Autoriser les routes d'authentification
-                .anyRequest().authenticated()  // Exiger une authentification pour les autres routes
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/hotel_photos/**", "/chambre_photos/**", "/suite_photos/**", "/subscribe_photos/**", "/client_photos/**").permitAll()
+                .requestMatchers("/create/hotel").authenticated() 
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     
         return http.build();
     }
     
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtService, userDetailsService, handlerExceptionResolver);
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:9000"));  // Autoriser tous les ports locaux
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(false);
@@ -67,8 +76,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-    
-    
 
     @Bean
     public RestTemplate restTemplate() {

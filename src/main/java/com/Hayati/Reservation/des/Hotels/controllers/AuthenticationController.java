@@ -4,10 +4,12 @@ import com.Hayati.Reservation.des.Hotels.dto.*;
 import com.Hayati.Reservation.des.Hotels.entity.Client;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.entity.User;
+import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import com.Hayati.Reservation.des.Hotels.responses.ChangePasswordRequest;
 import com.Hayati.Reservation.des.Hotels.responses.LoginResponse;
 import com.Hayati.Reservation.des.Hotels.services.AuthenticationService;
 import com.Hayati.Reservation.des.Hotels.services.JwtService;
+import com.Hayati.Reservation.des.Hotels.services.SubscribeService;
 import com.Hayati.Reservation.des.Hotels.repositoriy.ClientRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +26,12 @@ public class AuthenticationController {
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
+  private final SubscribeService subscribeService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
+    public AuthenticationController(JwtService jwtService, SubscribeService subscribeService,AuthenticationService authenticationService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
+        this.subscribeService =subscribeService;
     }
 
     @Autowired
@@ -60,32 +64,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(createdClient);
     }
 
-    @PostMapping("/signup/subscribe")
-    public ResponseEntity<?> signupSubscribe(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("nom") String nom,
-            @RequestParam("photo") MultipartFile photo) {
-
-        if (photo == null || photo.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo is required");
-        }
-
-        RegisterSubscribeDto registerSubscribeDto = new RegisterSubscribeDto()
-                .setEmail(email)
-                .setPassword(password)
-                .setNom(nom)
-                .setPhoto(photo);
-
-        Subscribe createdSubscribe = authenticationService.signupSubscribe(registerSubscribeDto);
-        if (createdSubscribe != null && createdSubscribe.getPhoto() != null) {
-            String imageUrl = "http://localhost:9001/" + createdSubscribe.getPhoto();
-            createdSubscribe.setPhoto(imageUrl);
-        }
-
-        return ResponseEntity.ok(createdSubscribe);
-    }
-
+    
     @PostMapping("/signup/admin")
     public ResponseEntity<User> registerAdmin(@RequestBody RegisterAdminDto registerAdminDto) {
         User registeredAdmin = authenticationService.signupAdmin(registerAdminDto);
@@ -97,6 +76,115 @@ public class AuthenticationController {
         LoginResponse response = authenticationService.authenticate(loginUserDto);
         return ResponseEntity.ok(response);
     }
+  
+
+    @PostMapping("/signup/subscribe")
+    public ResponseEntity<?> signupSubscribe(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("nom") String nom,
+            @RequestParam("photo") MultipartFile photo,
+            @RequestParam("status") Status status) {
+
+        if (photo == null || photo.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo is required");
+        }
+
+        RegisterSubscribeDto registerSubscribeDto = new RegisterSubscribeDto()
+                .setEmail(email)
+                .setPassword(password)
+                .setNom(nom)
+                .setPhoto(photo);
+
+        Subscribe createdSubscribe = subscribeService.createSubscribe(registerSubscribeDto);
+        createdSubscribe.setStatus(status); // Set the status based on the request parameter
+
+        // Update photo URL if provided
+        if (createdSubscribe.getPhoto() != null) {
+            String imageUrl = "http://192.168.100.4:9001/subscribe_photos/" + createdSubscribe.getPhoto();
+            createdSubscribe.setPhoto(imageUrl);
+        }
+
+        return ResponseEntity.ok(createdSubscribe);
+    }
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader("Authorization") String token,
+            @RequestParam("email") String email,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "photo", required = false) MultipartFile photo) {
+    
+        String extractedToken = token.substring(7); // Remove 'Bearer ' prefix
+        Subscribe user = (Subscribe) authenticationService.getUserFromToken(extractedToken);
+    
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+    
+        UpdateSubscribeDto updateDto = new UpdateSubscribeDto();
+        updateDto.setEmail(email);
+        if (password != null) {
+            updateDto.setPassword(password);
+        }
+    
+        Subscribe updatedUser = subscribeService.updateSubscribeProfile(user.getId(), updateDto, photo);
+        
+        // Set the complete image URL if a photo was uploaded
+        if (updatedUser.getPhoto() != null) {
+            String imageUrl = "http://192.168.100.174:9001/subscribe_photos/" + updatedUser.getPhoto();
+            updatedUser.setPhoto(imageUrl);
+        }
+    
+        return ResponseEntity.ok(updatedUser); // Returns the updated user profile data
+    }
+    
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
+        String extractedToken = token.substring(7); // Remove 'Bearer ' prefix
+        Subscribe user = (Subscribe) authenticationService.getUserFromToken(extractedToken);
+    
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+    
+        // Generate the full URL for the photo
+        if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
+            String imageUrl = "http://localhost:9001/subscribe_photos/" + user.getPhoto(); // Update the base URL if necessary
+            user.setPhoto(imageUrl);
+        }
+    
+        // Create a new UserProfileDto and set the photo URL
+        UserProfileDto profileDto = new UserProfileDto(user);
+        profileDto.setPhoto(user.getPhoto()); // Set the full URL for the photo
+    
+        return ResponseEntity.ok(profileDto);
+    }
+    
+    
+
+
+    // @PutMapping("/update-profile")
+    // public ResponseEntity<?> updateProfile(
+    //         @RequestHeader("Authorization") String token,
+    //         @RequestParam("email") String email,
+    //         @RequestParam(value = "password", required = false) String password,
+    //         @RequestParam(value = "photo", required = false) MultipartFile photo) {
+
+    //     String extractedToken = token.substring(7); // Remove 'Bearer ' prefix
+    //     Subscribe user = (Subscribe) authenticationService.getUserFromToken(extractedToken);
+
+    //     if (user == null) {
+    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+    //     }
+
+    //     UpdateSubscribeDto updateDto = new UpdateSubscribeDto();
+    //     updateDto.setEmail(email);
+    //     updateDto.setPassword(password);
+
+    //     Subscribe updatedUser = subscribeService.updateSubscribeProfile(user.getId(), updateDto, photo);
+
+    //     return ResponseEntity.ok(updatedUser);
+    // }
     @PostMapping("/verify")
 public ResponseEntity<?> verifyEmail(@RequestParam("code") String verificationCode) {
     Optional<Client> client = clientRepository.findByVerificationCode(verificationCode);
@@ -111,6 +199,7 @@ public ResponseEntity<?> verifyEmail(@RequestParam("code") String verificationCo
         return ResponseEntity.badRequest().body("Invalid verification code.");
     }
 }
+
  @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
             @RequestHeader("Authorization") String token,

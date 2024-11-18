@@ -1,5 +1,7 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,8 +50,10 @@ public class Chambre {
     
 
 
-    @ManyToOne
-    @JoinColumn(name = "suite_id")
+    // @ManyToOne
+    // @JoinColumn(name = "suite_id")
+    // private Suite suite;
+        @ManyToOne
+    @JsonBackReference
     private Suite suite;
-    
 }

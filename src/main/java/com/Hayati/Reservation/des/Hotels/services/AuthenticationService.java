@@ -177,4 +177,9 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user); // Save the updated user
     }
+
+    public void updateUserProfile(User user) {
+        // Save the updated user in the repository
+        userRepository.save(user);
+    }
 }

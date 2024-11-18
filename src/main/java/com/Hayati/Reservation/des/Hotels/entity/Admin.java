@@ -1,9 +1,11 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 @Entity
@@ -12,10 +14,12 @@ import lombok.experimental.Accessors;
 @Setter
 @Table(name = "admin")
 public class Admin extends User {
+   
+   
 
     @Override
     public Admin setName(String name) {
-        super.setName(name);  // Ensure you're using "name" and not "nom" if you're keeping it consistent with User
+        super.setName(name);
         return this;
     }
 
@@ -30,4 +34,6 @@ public class Admin extends User {
         super.setPassword(password);
         return this;
     }
+
+  
 }

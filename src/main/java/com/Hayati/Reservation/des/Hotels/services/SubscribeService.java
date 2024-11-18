@@ -10,14 +10,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.Hayati.Reservation.des.Hotels.dto.RegisterSubscribeDto;
 import com.Hayati.Reservation.des.Hotels.dto.UpdateSubscribeDto;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
+import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SubscribeRepository;
 import java.util.List;
-
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SubscribeService {
@@ -31,7 +33,7 @@ public class SubscribeService {
     private final String BASE_IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_Subscribe/";
 
     // Base URL for accessing images
-    private final String BASE_IMAGE_URL = "http://localhost:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.174:9001/";
     private String saveImageSubscribe(MultipartFile photo, String subDir) {
         try {
             String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
@@ -45,57 +47,79 @@ public class SubscribeService {
     }
     
 
-    // Méthode de création d'un client avec téléchargement de photo
     public Subscribe createSubscribe(RegisterSubscribeDto input) {
-        // Créer un nouvel objet client
         Subscribe subscribe = new Subscribe();
         subscribe.setName(input.getNom());
         subscribe.setEmail(input.getEmail());
         subscribe.setPassword(passwordEncoder.encode(input.getPassword()));
-    
-        // Ajouter le rôle 'ROLE_CLIENT'
         subscribe.getRoles().add("ROLE_SUBSCRIBE");
+        subscribe.setStatus(Status.ATTEND);
+
+        // Save photo if provided
+        if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
+            String photoPath = saveImageSubscribe(input.getPhoto(), "subscribe_photos/");
+            subscribe.setPhoto(photoPath);
+        }
+  
     
-        // Enregistrer le client dans la base de données
-        Subscribe savedSubscribe = subscribeRepository.save(subscribe);
+
+        // Use subscribeRepository.save() to save the subscribe entity
+        return subscribeRepository.save(subscribe);
+    }
+    public Subscribe save(Subscribe subscribe) {
+        return subscribeRepository.save(subscribe);
+    }
+    public Subscribe updateSubscribe(UpdateSubscribeDto updateSubscribeDto, Long id) {
+        // Check if the subscribe exists
+        Subscribe subscribe = subscribeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Subscribe not found with id: " + id));
     
-        // Générer l'URL complète pour l'image si elle est présente
-        if (savedSubscribe.getPhoto() != null) {
-            savedSubscribe.setPhoto("http://localhost:9001/" + savedSubscribe.getPhoto());
+        // Update the subscribe fields
+        subscribe.setEmail(updateSubscribeDto.getEmail());
+        subscribe.setPassword(passwordEncoder.encode(updateSubscribeDto.getPassword())); // Encrypt password if needed
+        subscribe.setName(updateSubscribeDto.getNom());
+        subscribe.setStatus(updateSubscribeDto.getStatus());
+    
+        // Handle the photo if provided
+        if (updateSubscribeDto.getPhoto() != null && !updateSubscribeDto.getPhoto().isEmpty()) {
+            String photoPath = saveImageSubscribe(updateSubscribeDto.getPhoto(), "subscribe_photos/");
+            subscribe.setPhoto(photoPath);  // Or save the photo URL as required
         }
     
-        // Retourner le client avec les rôles associés
-        return savedSubscribe;
+        return subscribeRepository.save(subscribe);
     }
     
-    
 
-    // Update an existing client
-    @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
-    public Subscribe updateSubscribe(UpdateSubscribeDto input, Long id) {
-        return subscribeRepository.findById(id).map(existingSubscribe -> {
-            // If there's a new photo, update it
-            if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
-                String photoPath = saveImageSubscribe(input.getPhoto(), "subscribe_photos/");
-                existingSubscribe.setPhoto(photoPath);
-            }
-
-            existingSubscribe.setName(input.getNom());
-            existingSubscribe.setEmail(input.getEmail());
-            if (input.getPassword() != null && !input.getPassword().isEmpty()) {
-                existingSubscribe.setPassword(passwordEncoder.encode(input.getPassword()));
-            }
-
-            Subscribe updatedSubscribe = subscribeRepository.save(existingSubscribe);
-
-            // Set full URL for the photo
-            updatedSubscribe.setPhoto("http://localhost:9001/" + updatedSubscribe.getPhoto());
-
-            return updatedSubscribe;
-        }).orElseThrow(() -> new RuntimeException("Subscribe not found"));
+    // Helper method to save the photo and return its path
+    private String savePhoto(MultipartFile photo) {
+        try {
+            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename();
+            Path filePath = Paths.get("subscribe_photos/" + fileName);
+            Files.write(filePath, photo.getBytes());
+            return filePath.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save photo", e);
+        }
     }
+    public Subscribe updateSubscribeProfile(Long userId, UpdateSubscribeDto updateDto, MultipartFile photo) {
+        Subscribe existingSubscribe = subscribeRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Update email and password
+        existingSubscribe.setEmail(updateDto.getEmail());
+        if (updateDto.getPassword() != null && !updateDto.getPassword().isEmpty()) {
+            existingSubscribe.setPassword(passwordEncoder.encode(updateDto.getPassword()));
+        }
+
+        // Save photo if provided
+        if (photo != null && !photo.isEmpty()) {
+            String photoPath = savePhoto(photo);
+            existingSubscribe.setPhoto(photoPath);
+        }
+
+        // Save updated user profile
+        return subscribeRepository.save(existingSubscribe);
+    }
     // Get all clients
     @PreAuthorize("hasRole('ADMIN')")
     public List<Subscribe> getAllSubscribes() {

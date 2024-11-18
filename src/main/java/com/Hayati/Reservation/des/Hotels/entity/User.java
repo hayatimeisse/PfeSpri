@@ -17,43 +17,41 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "users")
 public abstract class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")  // Gardez 'id' comme nom de colonne
-    private long id;
-    @Column(nullable = false)
-    private boolean isEmailVerified = false;
+    private Long id; // Primary key shared across subclasses
+
     @Column(nullable = false)
     private String name;
 
-@Email(message = "Veuillez fournir une adresse email valide")
-@Pattern(regexp = "^[\\w-\\.]+@gmail\\.com$", message = "L'email doit être une adresse Gmail valide")
-@Size(max = 254, message = "L'email ne peut pas dépasser 254 caractères")
-@Column(nullable = false, unique = true)
-private String email;
+    @Email(message = "Please provide a valid email address")
+    @Pattern(regexp = "^[\\w-\\.]+@gmail\\.com$", message = "Email must be a valid Gmail address")
+    @Size(max = 254, message = "Email cannot exceed 254 characters")
+    @Column(nullable = false, unique = true)
+    private String email;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private boolean isEmailVerified = false;
+
+    @Column(nullable = true, unique = true)
+    @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits")
+    private String numerodetelephone;
 
     @Column(name = "verification_code", length = 64)
     private String verificationCode;
 
-    @Column(nullable = false)
-    private String password;
-  ;
-
     @Column(name = "is_enabled")
     private Boolean isEnabled;
-
-
-    @Pattern(regexp = "^\\d{8}$", message = "Phone number must be exactly 8 digits")
-    @Column(nullable = true, unique = true)
-    private String numerodetelephone;
-    
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -68,21 +66,7 @@ private String email;
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    // Méthodes pour obtenir les rôles
-    public Set<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
-
-    // Méthode pour ajouter un rôle
-    public void addRole(String role) {
-        roles.add(role);
-    }
-
-    // Setters en chaîne (facultatif)
+    // Fluent setters for chaining
     public User setName(String name) {
         this.name = name;
         return this;
@@ -103,16 +87,12 @@ private String email;
         return this;
     }
 
+    // Spring Security methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(role -> (GrantedAuthority) () -> role)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
     }
 
     @Override
@@ -137,10 +117,9 @@ private String email;
 
     @Override
     public boolean isEnabled() {
-        return isEmailVerified;  // Le compte est activé uniquement après la vérification de l'email
+        return isEmailVerified;
     }
 
-    // Générer le code de vérification
     public void generateVerificationCode() {
         this.verificationCode = java.util.UUID.randomUUID().toString();
     }
