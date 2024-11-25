@@ -37,12 +37,12 @@ public class SubscribeController {
         List<Subscribe> subscribes = subscribeService.getAllSubscribes();
 
         // Append full image URL to each client
-        subscribes.forEach(subscribe -> {
-            if (subscribe.getPhoto() != null && !subscribe.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001/" + subscribe.getPhoto();
-                subscribe.setPhoto(imageUrl);
-            }
-        });
+        // subscribes.forEach(subscribe -> {
+        //     if (subscribe.getPhoto() != null && !subscribe.getPhoto().isEmpty()) {
+        //         String imageUrl = "http://localhost:9001/" + subscribe.getPhoto();
+        //         subscribe.setPhoto(imageUrl);
+        //     }
+        // });
         return ResponseEntity.ok(subscribes);
     }
 
@@ -53,10 +53,10 @@ public class SubscribeController {
         Optional<Subscribe> subscribe = subscribeService.getSubscribeById(id);
         if (subscribe.isPresent()) {
             Subscribe s = subscribe.get();
-            if (s.getPhoto() != null && !s.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001" + s.getPhoto();
-                s.setPhoto(imageUrl);
-            }
+            // if (s.getPhoto() != null && !s.getPhoto().isEmpty()) {
+            //     String imageUrl = "http://localhost:9001/" + s.getPhoto();
+            //     s.setPhoto(imageUrl);
+            // }
             return ResponseEntity.ok(s);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -111,14 +111,14 @@ public ResponseEntity<?> updateSubscribeStatus(@PathVariable Long id, @PathVaria
                 .setEmail(email)
                 .setPassword(password)
                 .setNom(nom)
-                .setStatus(status)
-                .setPhoto(photo);
+                .setStatus(status);
+                // .setPhoto(photo);
 
                 Subscribe createdSubscribe = subscribeService.createSubscribe(registerSubscribeDto);
-        if (createdSubscribe != null && createdSubscribe.getPhoto() != null) {
-            String imageUrl = "http://localhost:9001/" + createdSubscribe.getPhoto();
-            createdSubscribe.setPhoto(imageUrl);
-        }
+        // if (createdSubscribe != null && createdSubscribe.getPhoto() != null) {
+        //     String imageUrl = "http://localhost:9001/" + createdSubscribe.getPhoto();
+        //     createdSubscribe.setPhoto(imageUrl);
+        // }
         return ResponseEntity.ok(createdSubscribe);
     }
 
@@ -153,12 +153,12 @@ public ResponseEntity<?> updateSubscribeStatus(@PathVariable Long id, @PathVaria
             Subscribe updatedSubscribe = subscribeService.updateSubscribe(updateSubscribeDto, id);
     
             // Check if the photo is valid and prepend the base URL if necessary
-            if (updatedSubscribe.getPhoto() != null 
-                    && !updatedSubscribe.getPhoto().startsWith("http") 
-                    && !updatedSubscribe.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001/" + updatedSubscribe.getPhoto();
-                updatedSubscribe.setPhoto(imageUrl);
-            }
+            // if (updatedSubscribe.getPhoto() != null 
+            //         && !updatedSubscribe.getPhoto().startsWith("http") 
+            //         && !updatedSubscribe.getPhoto().isEmpty()) {
+            //     String imageUrl = "http://localhost:9001/" + updatedSubscribe.getPhoto();
+            //     updatedSubscribe.setPhoto(imageUrl);
+            // }
     
             // Return the updated subscribe object
             return ResponseEntity.ok(updatedSubscribe);

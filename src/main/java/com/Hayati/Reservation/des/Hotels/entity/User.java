@@ -50,8 +50,17 @@ public abstract class User implements UserDetails {
     @Column(name = "verification_code", length = 64)
     private String verificationCode;
 
-    @Column(name = "is_enabled")
-    private Boolean isEnabled;
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+    
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+    
+
+    // @Column(name = "is_enabled")
+    // private Boolean isEnabled;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -115,12 +124,12 @@ public abstract class User implements UserDetails {
         return true;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return isEmailVerified;
-    }
+    // @Override
+    // public boolean isEnabled() {
+    //     return isEmailVerified;
+    // }
 
-    public void generateVerificationCode() {
-        this.verificationCode = java.util.UUID.randomUUID().toString();
-    }
+    // public void generateVerificationCode() {
+    //     this.verificationCode = java.util.UUID.randomUUID().toString();
+    // }
 }

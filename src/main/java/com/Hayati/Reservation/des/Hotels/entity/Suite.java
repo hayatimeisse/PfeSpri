@@ -16,6 +16,7 @@ import lombok.Setter;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Getter
@@ -43,14 +44,14 @@ public class Suite {
     @Column(nullable = false)
     private String imageUrl;
 
-     @ManyToOne
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "hotel_id", referencedColumnName = "id_hot", nullable = false) // hotel_id matches in DB
     private Hotel hotel;
 
     // @OneToMany(mappedBy = "suite")
     // private Set<Chambre> chambres;
   @OneToMany(mappedBy = "suite")
-    @JsonManagedReference
+    @JsonIgnore // Prevent serialization of the suites collection
     private Set<Chambre> chambres;
    
 }

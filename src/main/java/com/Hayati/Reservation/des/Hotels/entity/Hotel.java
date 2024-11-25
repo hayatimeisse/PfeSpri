@@ -6,6 +6,7 @@ import lombok.*;
 import java.util.Set;
 
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Getter
@@ -52,8 +53,8 @@ public class Hotel {
     // @OneToMany(mappedBy = "hotel")
     // private Set<Employee> employees;
 
-       @OneToMany(mappedBy = "hotel")
-    @JsonManagedReference
+    @OneToMany(mappedBy = "hotel")
+    @JsonIgnore // Prevent serialization of the suites collection
     private Set<Suite> suites;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

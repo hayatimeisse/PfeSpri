@@ -33,7 +33,29 @@ public class SubscribeService {
     private final String BASE_IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_Subscribe/";
 
     // Base URL for accessing images
-    private final String BASE_IMAGE_URL = "http://192.168.100.174:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.108:9001/";
+
+    public Subscribe findByVerificationCode(String code) {
+        return subscribeRepository.findByVerificationCode(code);
+    }
+    public Optional<Subscribe> findById(Long id) {
+        return subscribeRepository.findById(id);
+    }
+
+    public boolean verifyEmail(Long userId, String code) {
+        Subscribe subscribe = subscribeRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        if (subscribe.getVerificationCode().equals(code)) {
+            subscribe.setStatus(Status.ATTEND); // Activer l'utilisateur
+            subscribe.setVerificationCode(null); // Supprimer le code
+            subscribeRepository.save(subscribe);
+            return true;
+        }
+        return false;
+    }
+
+
+   
     private String saveImageSubscribe(MultipartFile photo, String subDir) {
         try {
             String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
@@ -56,10 +78,10 @@ public class SubscribeService {
         subscribe.setStatus(Status.ATTEND);
 
         // Save photo if provided
-        if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
-            String photoPath = saveImageSubscribe(input.getPhoto(), "subscribe_photos/");
-            subscribe.setPhoto(photoPath);
-        }
+        // if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
+        //     String photoPath = saveImageSubscribe(input.getPhoto(), "subscribe_photos/");
+        //     subscribe.setPhoto(photoPath);
+        // }
   
     
 
@@ -83,7 +105,7 @@ public class SubscribeService {
         // Handle the photo if provided
         if (updateSubscribeDto.getPhoto() != null && !updateSubscribeDto.getPhoto().isEmpty()) {
             String photoPath = saveImageSubscribe(updateSubscribeDto.getPhoto(), "subscribe_photos/");
-            subscribe.setPhoto(photoPath);  // Or save the photo URL as required
+            // subscribe.setPhoto(photoPath);  // Or save the photo URL as required
         }
     
         return subscribeRepository.save(subscribe);
@@ -112,10 +134,10 @@ public class SubscribeService {
         }
 
         // Save photo if provided
-        if (photo != null && !photo.isEmpty()) {
-            String photoPath = savePhoto(photo);
-            existingSubscribe.setPhoto(photoPath);
-        }
+        // if (photo != null && !photo.isEmpty()) {
+        //     String photoPath = savePhoto(photo);
+        //     existingSubscribe.setPhoto(photoPath);
+        // }
 
         // Save updated user profile
         return subscribeRepository.save(existingSubscribe);

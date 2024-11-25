@@ -43,4 +43,30 @@ public class SuiteDto {
         this.imageUrl = imageUrl;
         return this;
     }
+
+    // Getter methods for retrieving the values of the fields
+
+    public Long getId_sui() {
+        return id_sui;
+    }
+
+    public float getPrixJour() {
+        return prixJour;
+    }
+
+    public boolean isDisponibilites() {
+        return disponibilites;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Long getHotel_id() {
+        return hotel_id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
 }

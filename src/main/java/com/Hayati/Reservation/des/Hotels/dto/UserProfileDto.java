@@ -14,56 +14,58 @@ public class UserProfileDto {
         this.numerodetelephone = user.getNumerodetelephone();
         this.email = user.getEmail();
         this.enabled = user.isEnabled();
-        
-        String baseUrl = "http://localhost:9001/subscribe_photos/";
-        this.photo = baseUrl + user.getPhoto();
 
+        // // Ensure the photo URL is correct
+        // if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
+        //     if (user.getPhoto().startsWith("http://") || user.getPhoto().startsWith("https://")) {
+        //         this.photo = user.getPhoto(); // Use the existing full URL
+        //     } else {
+        //         String baseUrl = "http://localhost:9001/subscribe_photos/";
+        //         this.photo = baseUrl + user.getPhoto(); // Generate the full URL
+        //     }
+        // } else {
+        //     this.photo = null; // No photo available
+        // }
     }
 
-    // Getters
+    // Getters and setters
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNumerodetelephone() {
         return numerodetelephone;
     }
 
-    
+    public void setNumerodetelephone(String numerodetelephone) {
+        this.numerodetelephone = numerodetelephone;
+    }
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public String getPhoto() {
-        return photo;
-    }
-
-    // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setNumerodetelephone(String numerodetelephone) {
-        this.numerodetelephone = numerodetelephone;
-    }
-
-    
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getPhoto() {
+        return photo;
     }
 
     public void setPhoto(String photo) {
         this.photo = photo;
     }
 }
-

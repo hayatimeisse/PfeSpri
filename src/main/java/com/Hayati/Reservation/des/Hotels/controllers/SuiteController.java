@@ -148,5 +148,10 @@ public class SuiteController {
         long count = suiteService.getSuiteCount();
         return ResponseEntity.ok(count);
     }
-
+    // @GetMapping("/hotel/{hotelId}")
+    // public ResponseEntity<List<SuiteDto>> getSuitesByHotelId(@PathVariable Long hotelId) {
+    //     List<SuiteDto> suites = suiteService.getSuitesForHotel(hotelId);
+    //     return ResponseEntity.ok(suites); // Always return 200 with empty or populated list
+    // }
+    
 }

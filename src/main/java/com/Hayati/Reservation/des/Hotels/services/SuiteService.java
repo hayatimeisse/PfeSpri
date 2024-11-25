@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class SuiteService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.108:9001/";
 
   
 
@@ -44,7 +44,33 @@ public class SuiteService {
     public List<Suite> getSuitesByHotelAndSubscribe(Long hotelId, Long subscribeId) {
         return suiteRepositoriy.findByHotelIdAndSubscribeId(hotelId, subscribeId);
     }
-
+    // public List<SuiteDto> getSuitesForHotel(Long hotelId) {
+    //     // Fetch suites for a hotel based on hotelId
+    //     List<Suite> suites = suiteRepositoriy.findByHotel_IdHot(hotelId);
+    
+    //     // Convert suites to DTO
+    //     return suites.stream().map(suite -> {
+    //         SuiteDto suiteDto = new SuiteDto();
+    //         suiteDto.setId_sui(suite.getId_sui());
+    //         suiteDto.setPrixJour(suite.getPrixJour());
+    //         suiteDto.setDisponibilites(suite.isDisponibilites());
+    //         suiteDto.setDescription(suite.getDescription());
+    
+    //         // Associate the hotel ID to the DTO
+    //         suiteDto.setHotel_id(suite.getHotel() != null ? suite.getHotel().getId_hot() : null);
+    
+    //         // Format image URL correctly
+    //         String imageUrl = suite.getImageUrl();
+    //         if (imageUrl != null && !imageUrl.startsWith("http")) {
+    //             imageUrl = BASE_IMAGE_URL + imageUrl;
+    //         }
+    //         suiteDto.setImageUrl(imageUrl);
+            
+    //         return suiteDto;
+    //     }).collect(Collectors.toList());
+    // }
+    
+    
     // Créer une nouvelle suite avec téléchargement d'image et association à un hôtel
     public SuiteDto createSuite(SuiteDto suiteDto, MultipartFile photo) {
         String imageUrl = saveImage(photo, "suite_photos/");

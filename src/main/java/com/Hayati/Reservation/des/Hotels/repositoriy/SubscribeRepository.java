@@ -11,5 +11,5 @@ import java.util.Optional;
 
 @Repository
 public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
-    // You can add custom queries here if needed
+    Subscribe findByVerificationCode(String verificationCode);
 }

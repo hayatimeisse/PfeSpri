@@ -7,6 +7,9 @@ import com.Hayati.Reservation.des.Hotels.entity.Hotel;
 import com.Hayati.Reservation.des.Hotels.entity.Suite;
 import com.Hayati.Reservation.des.Hotels.repositoriy.ChambreRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,14 +27,23 @@ import java.util.stream.Collectors;
 public class ChambreService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.174:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.108:9001/";
+
+    private final ChambreRepositoriy chambreRepositoriy;
+   
+    @Autowired
+    public ChambreService(ChambreRepositoriy chambreRepository) {
+        this.chambreRepositoriy = chambreRepository;
+    }
+
+    public List<Chambre> getChambresBySuiteAndSubscribe(Long suiteId, Long subscribeId) {
+        // Utilisation de l'instance injectée
+        return chambreRepositoriy.findBySuiteIdAndSubscribeId(suiteId, subscribeId);
+    }
 
     @Autowired
-    private ChambreRepositoriy chambreRepositoriy;
-
-    @Autowired
-    private SuiteRepositoriy suiteRepositoriy;  // Ajouter le repositoriy pour gérer les suites
-
+    private SuiteRepositoriy suiteRepositoriy;  
+  
     // Créer une nouvelle chambre avec téléchargement d'image et association à une suite
     public ChambreDto createChambre(ChambreDto chambreDto, MultipartFile photo) {
         String imageUrl = saveImage(photo, "chambre_photos/");
@@ -56,22 +68,34 @@ public class ChambreService {
 
         return mapToDto(savedChambre);
     }
+    @Transactional
+    public List<Chambre> getChambresByHotelId(Long hotelId) {
+        return chambreRepositoriy.findByHotelId(hotelId);
+    }
+    
 
     // public List<ChambreDto> getChambresByHotelId(Long hotelId) {
-    //     List<Suite> suites = suiteRepositoriy.findByHotelId(hotelId);
-
+    //     // Fetch suites by hotel ID
+    //     List<Suite> suites = suiteRepositoriy.findByHotel_IdHot(hotelId);
+    
     //     if (suites.isEmpty()) {
     //         throw new RuntimeException("No suites found for the hotel");
     //     }
-
-    //     List<Long> suiteIds = suites.stream().map(Suite::getId_sui).collect(Collectors.toList());
-
-    //     List<Chambre> chambres = chambreRepositoriy.findBySuite_Id_suiIn(suiteIds);
-
+    
+    //     // Extract suite IDs
+    //     List<Long> suiteIds = suites.stream()
+    //                                 .map(Suite::getId_sui)
+    //                                 .collect(Collectors.toList());
+    
+    //     // Fetch chambres by suite IDs
+    //     List<Chambre> chambres = chambreRepositoriy.findChambresBySuiteIds(suiteIds);
+    
+    //     // Map to DTOs
     //     return chambres.stream()
-    //             .map(this::mapToDto)
-    //             .collect(Collectors.toList());
+    //                    .map(this::mapToDto)
+    //                    .collect(Collectors.toList());
     // }
+    
 
     // Obtenir la liste de toutes les chambres
     public List<ChambreDto> getAllChambres() {
@@ -82,25 +106,7 @@ public class ChambreService {
   
   
   
-    public List<ChambreDto> getChambresByHotelId(Long hotelId) {
-        List<Chambre> chambres = chambreRepositoriy.findByHotelId(hotelId);
-        
-        // Convertir les entités Chambre en DTOs
-        return chambres.stream()
-                .map(chambre -> {
-                    ChambreDto chambreDto = new ChambreDto();
-                    chambreDto.setId_cham(chambre.getId_cham());
-                    chambreDto.setName(chambre.getName());
-                    chambreDto.setImageUrl(chambre.getImageUrl());
-                    chambreDto.setPrixJour(chambre.getPrixJour());
-                    chambreDto.setDisponibilites(chambre.isDisponibilites());
-                    chambreDto.setDescription(chambre.getDescription());
-                    chambreDto.setCapacite(chambre.getCapacite());
-                    return chambreDto;
-                })
-                .collect(Collectors.toList());
-    }
-    
+   
     // Obtenir une chambre par ID
     public Optional<ChambreDto> getChambreById(Long id) {
         return chambreRepositoriy.findById(id)

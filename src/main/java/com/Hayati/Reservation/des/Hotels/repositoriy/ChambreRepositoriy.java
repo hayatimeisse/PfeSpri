@@ -7,14 +7,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 import com.Hayati.Reservation.des.Hotels.entity.Chambre;
-import com.Hayati.Reservation.des.Hotels.entity.Suite;
 
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
 
 public interface ChambreRepositoriy extends JpaRepository<Chambre, Long> {
-
-    @Query("SELECT c FROM Chambre c WHERE c.suite.hotel.id_hot = :hotelId")
-    List<Chambre> findByHotelId(@Param("hotelId") Long hotelId);
-}
+     @Query("SELECT c FROM Chambre c WHERE c.suite.hotel.id_hot = :hotelId")
+     List<Chambre> findByHotelId(Long hotelId);
+     @Query("SELECT c FROM Chambre c WHERE c.suite.id = :suiteId AND c.suite.hotel.subscribe.id = :subscribeId")
+     List<Chambre> findBySuiteIdAndSubscribeId(@Param("suiteId") Long suiteId, @Param("subscribeId") Long subscribeId);
+     
+ }

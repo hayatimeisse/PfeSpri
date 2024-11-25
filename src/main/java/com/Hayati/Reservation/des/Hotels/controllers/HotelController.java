@@ -1,11 +1,15 @@
 package com.Hayati.Reservation.des.Hotels.controllers;
 
+import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
 import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.entity.Hotel;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
+import com.Hayati.Reservation.des.Hotels.services.ChambreService;
 import com.Hayati.Reservation.des.Hotels.services.HotelService;
+import com.Hayati.Reservation.des.Hotels.services.SuiteService;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -26,10 +30,11 @@ import java.util.Optional;
 public class HotelController {
 
     private final HotelService hotelService;
-
+    private final ChambreService chambreService;
     @Autowired
-    public HotelController(HotelService hotelService) {
+    public HotelController(HotelService hotelService,ChambreService chambreService) {
         this.hotelService = hotelService;
+        this.chambreService=chambreService;
     }
     @GetMapping("/hotels/subscribe/{subscribeId}")
     public ResponseEntity<List<HotelDto>> getHotelsBySubscribeId(@PathVariable Long subscribeId) {
@@ -37,7 +42,8 @@ public class HotelController {
         return ResponseEntity.ok(hotels);
     }
   
-
+ 
+    
     @PostMapping("/create/hotel")
     public ResponseEntity<HotelDto> createHotel(
             @RequestParam("name") String name,
@@ -81,7 +87,7 @@ public class HotelController {
         HotelDto createdHotel = hotelService.createHotel(hotelDto, photo);
     
         if (createdHotel != null && createdHotel.getImageUrl() != null) {
-            String imageUrl = "http://192.168.100.4:9001/" + createdHotel.getImageUrl();
+            String imageUrl = "http://192.168.100.174:9001/" + createdHotel.getImageUrl();
             createdHotel.setImageUrl(imageUrl);
         }
     
@@ -191,7 +197,7 @@ public class HotelController {
         // Add base URL to image URLs and include subscribe_id
         hotels.forEach(hotel -> {
             if (hotel.getImageUrl() != null && !hotel.getImageUrl().startsWith("http")) {
-                hotel.setImageUrl("http://localhost:9001/" + hotel.getImageUrl());
+                hotel.setImageUrl("http://192.168.100.4:9001/" + hotel.getImageUrl());
             }
         });
     

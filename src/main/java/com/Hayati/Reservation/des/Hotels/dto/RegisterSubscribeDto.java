@@ -8,17 +8,9 @@ public class RegisterSubscribeDto {
     private String email;
     private String password;
     private String nom;
-    private MultipartFile photo;
     private Status status;
 
-    public MultipartFile getPhoto() {
-        return photo;
-    }
-
-    public RegisterSubscribeDto setPhoto(MultipartFile photo) {
-        this.photo = photo;
-        return this;
-    }
+ 
     public Status getStatus() {
         return status;
     }

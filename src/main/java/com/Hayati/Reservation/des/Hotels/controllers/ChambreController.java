@@ -22,11 +22,18 @@ import java.util.Optional;
 public class ChambreController {
 
     private final ChambreService chambreService;
-
     @Autowired
     public ChambreController(ChambreService chambreService) {
         this.chambreService = chambreService;
-    } @GetMapping("/count")
+    }
+
+    @GetMapping("/suite/{suiteId}/subscribe/{subscribeId}")
+    public List<Chambre> getChambresBySuiteAndSubscribe(
+            @PathVariable Long suiteId,
+            @PathVariable Long subscribeId) {
+        return chambreService.getChambresBySuiteAndSubscribe(suiteId, subscribeId);
+    }
+    @GetMapping("/count")
     public ResponseEntity<Long> getCountOfChambress() {
         long count = chambreService.getChambreCount();
         return ResponseEntity.ok(count);
@@ -68,22 +75,14 @@ public ResponseEntity<List<ChambreDto>> listChambres(@RequestParam(value = "sear
 // }
 
 
+
+
+
 @GetMapping("/hotel/{hotelId}")
-public ResponseEntity<List<ChambreDto>> getRoomsByHotelId(@PathVariable Long hotelId) {
-    List<ChambreDto> chambres = chambreService.getChambresByHotelId(hotelId);
-
-    chambres.forEach(chambre -> {
-        if (chambre.getImageUrl() != null && !chambre.getImageUrl().startsWith("http")) {
-            chambre.setImageUrl("http://192.168.100.197:9001/" + chambre.getImageUrl());  // Assurez-vous que cette URL est correcte
-        }
-    });
-
+public ResponseEntity<List<Chambre>> getChambresByHotel(@PathVariable Long hotelId) {
+    List<Chambre> chambres = chambreService.getChambresByHotelId(hotelId);
     return ResponseEntity.ok(chambres);
 }
-
-
-
-
 
 
 @PostMapping("/create")

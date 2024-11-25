@@ -50,10 +50,8 @@ public class Chambre {
     
 
 
-    // @ManyToOne
-    // @JoinColumn(name = "suite_id")
-    // private Suite suite;
-        @ManyToOne
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "suite_id")
     private Suite suite;
+       
 }
