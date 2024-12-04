@@ -1,17 +1,13 @@
 package com.Hayati.Reservation.des.Hotels.controllers;
 
-import com.Hayati.Reservation.des.Hotels.dto.ChambreDto;
 import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
-import com.Hayati.Reservation.des.Hotels.dto.SuiteDto;
 import com.Hayati.Reservation.des.Hotels.entity.Hotel;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import com.Hayati.Reservation.des.Hotels.services.ChambreService;
 import com.Hayati.Reservation.des.Hotels.services.HotelService;
-import com.Hayati.Reservation.des.Hotels.services.SuiteService;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import io.jsonwebtoken.io.IOException;
 
@@ -54,7 +50,7 @@ public class HotelController {
             @RequestParam("commentaires") String commentaires,
             @RequestParam("notifications") String notifications,
             @RequestParam("description") String description,
-            @RequestParam("status") String status,
+            @RequestParam("status") Status status,
             @RequestParam("photo") MultipartFile photo,
             @AuthenticationPrincipal Subscribe authenticatedUser) throws IOException {
     
@@ -64,13 +60,7 @@ public class HotelController {
     
         Long subscribe_id = authenticatedUser.getId();
     
-        Status enumStatus;
-        try {
-            enumStatus = Status.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new HotelDto().setName("Invalid status value"));
-        }
+         
     
         HotelDto hotelDto = new HotelDto()
                 .setName(name)
@@ -80,9 +70,10 @@ public class HotelController {
                 .setLongitude(longitude)
                 .setCommentaires(commentaires)
                 .setNotifications(notifications)
-                .setStatus(enumStatus)
+                .setStatus(status)
                 .setDescription(description)
                 .setSubscribe_id(subscribe_id);
+                // .setServiceIds(serviceIds); 
     
         HotelDto createdHotel = hotelService.createHotel(hotelDto, photo);
     
@@ -105,13 +96,11 @@ public class HotelController {
             @RequestParam("commentaires") String commentaires,
             @RequestParam("notifications") String notifications,
             @RequestParam("description") String description,
-            @RequestParam("status") String status,
+            @RequestParam("status") Status status,
             @RequestParam("photo") MultipartFile photo,
             @RequestParam("subscribe_id") Long subscribe_id) throws IOException {
     
-        // Validate status
-        Status enumStatus = Status.valueOf(status.toUpperCase());
-    
+     
         HotelDto hotelDto = new HotelDto()
                 .setName(name)
                 .setEmplacement(emplacement)
@@ -121,12 +110,12 @@ public class HotelController {
                 .setDescription(description)
                 .setCommentaires(commentaires)
                 .setNotifications(notifications)
-                .setStatus(enumStatus)
+                .setStatus(status)
                 .setSubscribe_id(subscribe_id);
     
         HotelDto createdHotel = hotelService.createHotel(hotelDto, photo);
         if (createdHotel != null && createdHotel.getImageUrl() != null) {
-            String imageUrl = "http://192.168.100.4:9001/" + createdHotel.getImageUrl();
+            String imageUrl = "http://localhost:9001/" + createdHotel.getImageUrl();
             createdHotel.setImageUrl(imageUrl);
         }
     
@@ -135,17 +124,14 @@ public class HotelController {
     
     @GetMapping("/hotels")
     public ResponseEntity<List<HotelDto>> getAllHotels() {
-        // Fetch all hotels from the service layer
         List<HotelDto> hotels = hotelService.getAllHotels();
     
-        // Set full image URL for each hotel
         hotels.forEach(hotel -> {
             if (hotel.getImageUrl() != null && !hotel.getImageUrl().startsWith("http")) {
                 hotel.setImageUrl("http://localhost:9001/" + hotel.getImageUrl());
             }
         });
     
-        // Return the list of hotels
         return ResponseEntity.ok(hotels);
     }
     
@@ -164,8 +150,8 @@ public class HotelController {
     
                 if ("accepted".equalsIgnoreCase(status) || "rejected".equalsIgnoreCase(status) || "attend".equalsIgnoreCase(status)) {
                     System.out.println("Updating status to: " + status.toUpperCase());
-                    hotel.setStatus(Status.valueOf(status.toUpperCase())); // Update status
-                    hotelService.save(hotel); // Save the updated entity
+                    hotel.setStatus(Status.valueOf(status.toUpperCase())); 
+                    hotelService.save(hotel); 
                     System.out.println("Status updated successfully to " + status);
                     return ResponseEntity.ok("Hotel status updated to " + status);
                 } else {
@@ -187,14 +173,12 @@ public class HotelController {
     public ResponseEntity<List<HotelDto>> listHotels(@RequestParam(value = "search", required = false) String search) {
         List<HotelDto> hotels = hotelService.getAllHotels();
     
-        // Filter hotels based on the search query
         if (search != null && !search.isEmpty()) {
             hotels = hotels.stream()
                     .filter(hotel -> hotel.getName().toLowerCase().contains(search.toLowerCase()))
                     .collect(Collectors.toList());
         }
     
-        // Add base URL to image URLs and include subscribe_id
         hotels.forEach(hotel -> {
             if (hotel.getImageUrl() != null && !hotel.getImageUrl().startsWith("http")) {
                 hotel.setImageUrl("http://192.168.100.4:9001/" + hotel.getImageUrl());
@@ -206,7 +190,6 @@ public class HotelController {
     
     
 
-    // Obtenir un hôtel par ID
     @GetMapping("/hotels/{id}")
     public ResponseEntity<HotelDto> getHotelById(@PathVariable Long id) {
         Optional<HotelDto> hotel = hotelService.getHotelEntityById(id);
@@ -220,7 +203,6 @@ public class HotelController {
 
  
 
-    // Supprimer un hôtel
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
         hotelService.deleteHotel(id);

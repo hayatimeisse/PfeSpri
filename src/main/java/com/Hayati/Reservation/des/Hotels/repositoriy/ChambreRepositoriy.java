@@ -14,5 +14,5 @@ public interface ChambreRepositoriy extends JpaRepository<Chambre, Long> {
      List<Chambre> findByHotelId(Long hotelId);
      @Query("SELECT c FROM Chambre c WHERE c.suite.id = :suiteId AND c.suite.hotel.subscribe.id = :subscribeId")
      List<Chambre> findBySuiteIdAndSubscribeId(@Param("suiteId") Long suiteId, @Param("subscribeId") Long subscribeId);
-     
+    //  List<Chambre> findByHotelId(Long hotelId);
  }

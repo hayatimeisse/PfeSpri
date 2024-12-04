@@ -2,6 +2,7 @@ package com.Hayati.Reservation.des.Hotels.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -26,10 +27,26 @@ public class JwtService {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
+  
+  
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        try {
+            // Initialise le JwtParser avec la clé secrète
+            Claims claims = Jwts.parserBuilder()
+                                .setSigningKey(secretKey)
+                                .build()
+                                .parseClaimsJws(token)
+                                .getBody();
+
+            return claims.getSubject(); // Extrait le "subject" (souvent le username)
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de l'extraction du username : " + e.getMessage());
+        }
     }
 
+
+    
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);

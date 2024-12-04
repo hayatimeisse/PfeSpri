@@ -47,10 +47,16 @@ public class SecurityConfiguration {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // Points accessibles sans authentification
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/hotel_photos/**", "/chambre_photos/**", "/suite_photos/**", "/subscribe_photos/**", "/client_photos/**").permitAll()
-                .requestMatchers("/create/hotel").authenticated() 
+                .requestMatchers("/hotel_photos/**", "/chambre_photos/**", "/suite_photos/**").permitAll()
+                .requestMatchers("/api/auth/reset-password").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+    
+                // Points nécessitant une authentification
+                .requestMatchers("/create/hotel", "/api/auth/services").authenticated()
+                
+                // Par défaut, authentification requise
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,6 +65,7 @@ public class SecurityConfiguration {
     
         return http.build();
     }
+    
     
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -76,6 +83,7 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    
 
     @Bean
     public RestTemplate restTemplate() {

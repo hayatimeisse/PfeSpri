@@ -1,5 +1,7 @@
 package com.Hayati.Reservation.des.Hotels.dto;
 
+import java.util.List;
+
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -18,7 +20,15 @@ public class HotelDto {
     private String notifications;
     private String imageUrl;
     private Status status;
+    // private List<Long> services;
+    // public List<Long> getServices() {
+    //     return services;
+    // }
 
+    // public HotelDto setServiceIds(List<Long> serviceIds) {
+    //     this.services = serviceIds;
+    //     return this;
+    // }
     private Long subscribe_id; 
     public Long getSubscribe_id() {
         return subscribe_id;

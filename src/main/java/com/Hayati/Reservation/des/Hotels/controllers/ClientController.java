@@ -31,13 +31,7 @@ public class ClientController {
     public ResponseEntity<List<Client>> listClients() {
         List<Client> clients = clientService.getAllClients();
     
-        // Append full image URL to each client
-        clients.forEach(client -> {
-            if (client.getPhoto() != null && !client.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001/" + client.getPhoto();
-                client.setPhoto(imageUrl);
-            }
-        });
+       
         return ResponseEntity.ok(clients);
     }
     
@@ -49,10 +43,7 @@ public class ClientController {
         Optional<Client> client = clientService.getClientById(id);
         if (client.isPresent()) {
             Client c = client.get();
-            if (c.getPhoto() != null && !c.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001" + c.getPhoto();
-                c.setPhoto(imageUrl);
-            }
+           
             return ResponseEntity.ok(c);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -85,10 +76,7 @@ public class ClientController {
                 .setNumerodetelephone(numerodetelephone);
 
         Client createdClient = clientService.createClient(registerClientDto);
-        if (createdClient != null && createdClient.getPhoto() != null) {
-            String imageUrl = "http://localhost:9001/" + createdClient.getPhoto();
-            createdClient.setPhoto(imageUrl);
-        }
+      
         return ResponseEntity.ok(createdClient);
     }
 
@@ -121,10 +109,6 @@ public class ClientController {
         try {
             Client updatedClient = clientService.updateClient(updateClientDto, id);
 
-            if (updatedClient.getPhoto() != null && !updatedClient.getPhoto().startsWith("http") && !updatedClient.getPhoto().isEmpty()) {
-                String imageUrl = "http://localhost:9001/" + updatedClient.getPhoto();
-                updatedClient.setPhoto(imageUrl);
-            }
             return ResponseEntity.ok(updatedClient);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found or update failed.");

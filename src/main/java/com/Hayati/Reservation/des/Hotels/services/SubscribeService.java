@@ -10,8 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.Hayati.Reservation.des.Hotels.dto.RegisterSubscribeDto;
 import com.Hayati.Reservation.des.Hotels.dto.UpdateSubscribeDto;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
+import com.Hayati.Reservation.des.Hotels.entity.Suite;
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SubscribeRepository;
+import com.Hayati.Reservation.des.Hotels.repositoriy.SuiteRepositoriy;
+
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +36,10 @@ public class SubscribeService {
     private final String BASE_IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_Subscribe/";
 
     // Base URL for accessing images
-    private final String BASE_IMAGE_URL = "http://192.168.100.108:9001/";
-
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
+    public Subscribe saveSubscribe(Subscribe subscribe) {
+        return subscribeRepository.save(subscribe);
+    }
     public Subscribe findByVerificationCode(String code) {
         return subscribeRepository.findByVerificationCode(code);
     }

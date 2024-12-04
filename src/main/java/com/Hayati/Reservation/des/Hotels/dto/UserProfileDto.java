@@ -11,7 +11,6 @@ public class UserProfileDto {
 
     public UserProfileDto(Subscribe user) {
         this.name = user.getName();
-        this.numerodetelephone = user.getNumerodetelephone();
         this.email = user.getEmail();
         this.enabled = user.isEnabled();
 

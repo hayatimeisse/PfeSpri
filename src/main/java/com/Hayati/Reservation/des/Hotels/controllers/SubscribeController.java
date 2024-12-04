@@ -17,6 +17,7 @@ import com.Hayati.Reservation.des.Hotels.dto.UpdateSubscribeDto;
 import com.Hayati.Reservation.des.Hotels.entity.Client;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
+import com.Hayati.Reservation.des.Hotels.services.EmailService;
 import com.Hayati.Reservation.des.Hotels.services.SubscribeService;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -24,10 +25,11 @@ import com.Hayati.Reservation.des.Hotels.services.SubscribeService;
 @RestController
 public class SubscribeController {
     private final SubscribeService subscribeService;
-
+private final EmailService emailService;
     @Autowired
-    public SubscribeController(SubscribeService subscribeService) {
+    public SubscribeController(SubscribeService subscribeService,EmailService emailService) {
         this.subscribeService = subscribeService;
+        this.emailService=emailService;
     }
 
     // List all clients
@@ -89,7 +91,6 @@ public ResponseEntity<?> updateSubscribeStatus(@PathVariable Long id, @PathVaria
 
 
 
-    // Delete a client
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteSubscribe(@PathVariable Long id) {
@@ -97,14 +98,12 @@ public ResponseEntity<?> updateSubscribeStatus(@PathVariable Long id, @PathVaria
         return ResponseEntity.ok("Subscribe with ID " + id + " has been deleted successfully.");
     }
 
-    // Create a new client
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createSubscribe(
             @RequestParam("email") String email,
             @RequestParam("password") String password,
             @RequestParam("nom") String nom,
-            @RequestParam("photo") MultipartFile photo,
                  @RequestParam("status") Status status) {
 
         RegisterSubscribeDto registerSubscribeDto = new RegisterSubscribeDto()
@@ -131,41 +130,36 @@ public ResponseEntity<?> updateSubscribeStatus(@PathVariable Long id, @PathVaria
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateSubscribe(
-            @PathVariable Long id,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("nom") String nom,
-            @RequestParam("status") Status status,
-            @RequestParam(value = "photo", required = false) MultipartFile photo) {
-    
-        // Create a DTO with the provided request parameters
-        UpdateSubscribeDto updateSubscribeDto = new UpdateSubscribeDto()
-                .setEmail(email)
-                .setPassword(password)
-                .setNom(nom)
-                .setStatus(status)
-                .setPhoto(photo);
-    
-        try {
-            // Call the service to update the subscribe object
-            Subscribe updatedSubscribe = subscribeService.updateSubscribe(updateSubscribeDto, id);
-    
-            // Check if the photo is valid and prepend the base URL if necessary
-            // if (updatedSubscribe.getPhoto() != null 
-            //         && !updatedSubscribe.getPhoto().startsWith("http") 
-            //         && !updatedSubscribe.getPhoto().isEmpty()) {
-            //     String imageUrl = "http://localhost:9001/" + updatedSubscribe.getPhoto();
-            //     updatedSubscribe.setPhoto(imageUrl);
-            // }
-    
-            // Return the updated subscribe object
-            return ResponseEntity.ok(updatedSubscribe);
-    
-        } catch (RuntimeException e) {
-            // Return an error response if the subscribe could not be updated
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscribe not found or update failed.");
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> updateSubscribe(
+        @PathVariable Long id,
+        @RequestParam("email") String email,
+        @RequestParam("password") String password,
+        @RequestParam("nom") String nom,
+        @RequestParam("status") Status status) {
+
+    UpdateSubscribeDto updateSubscribeDto = new UpdateSubscribeDto()
+            .setEmail(email)
+            .setPassword(password)
+            .setNom(nom)
+            .setStatus(status);
+
+    try {
+        // Update subscribe entity
+        Subscribe updatedSubscribe = subscribeService.updateSubscribe(updateSubscribeDto, id);
+
+        // Check if the email has changed
+        if (!updatedSubscribe.getEmail().equals(email)) {
+            updatedSubscribe.setEmailVerified(false); // Reset email verification status
+            subscribeService.saveSubscribe(updatedSubscribe); // Save the updated entity
+            emailService.sendVerificationEmail(updatedSubscribe); // Send email verification
         }
-    }    
+
+        return ResponseEntity.ok(updatedSubscribe);
+
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscribe not found or update failed.");
+    }
+}
+ 
 }

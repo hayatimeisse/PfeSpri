@@ -25,6 +25,7 @@ public class SuiteController {
     public SuiteController(SuiteService suiteService) {
         this.suiteService = suiteService; // Initialize suiteService
     }
+  
 
     @GetMapping("/hotel/{hotelId}/subscribe/{subscribeId}")
     public List<Suite> getSuitesByHotelAndSubscribe(@PathVariable Long hotelId, @PathVariable Long subscribeId) {

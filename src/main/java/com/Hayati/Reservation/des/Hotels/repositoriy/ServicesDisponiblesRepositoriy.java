@@ -12,5 +12,6 @@ public interface ServicesDisponiblesRepositoriy extends JpaRepository<ServicesDi
     // Query to get services by hotel ID
     @Query("SELECT s FROM Hotel h JOIN h.servicesDisponibles s WHERE h.id_hot = :hotelId")
     List<ServicesDisponibles> findServicesByHotelId(Long hotelId);
-    
+    @Query("SELECT s FROM ServicesDisponibles s WHERE s.id_ser IN :serviceIds")
+    List<ServicesDisponibles> findAllByIds(List<Long> serviceIds);
 }

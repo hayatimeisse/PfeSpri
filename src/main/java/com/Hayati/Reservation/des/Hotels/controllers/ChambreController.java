@@ -67,23 +67,40 @@ public ResponseEntity<List<ChambreDto>> listChambres(@RequestParam(value = "sear
         Optional<ChambreDto> chambre = chambreService.getChambreById(id);
         return chambre.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-   // Fetch rooms by hotel ID through suite association
-// @GetMapping("/hotel/{hotelId}")
-// public ResponseEntity<List<ChambreDto>> getRoomsByHotelId(@PathVariable Long hotelId) {
-//     List<ChambreDto> chambres = chambreService.getChambresByHotelId(hotelId);  // Ensure this method is implemented
-//     return ResponseEntity.ok(chambres);
-// }
 
 
 
 
 
-@GetMapping("/hotel/{hotelId}")
-public ResponseEntity<List<Chambre>> getChambresByHotel(@PathVariable Long hotelId) {
-    List<Chambre> chambres = chambreService.getChambresByHotelId(hotelId);
-    return ResponseEntity.ok(chambres);
-}
-
+    @GetMapping("/hotel/{hotelId}")
+    public ResponseEntity<List<ChambreDto>> getChambresByHotel(@PathVariable Long hotelId) {
+        List<Chambre> chambres = chambreService.getChambresByHotelId(hotelId);
+    
+        // Map Chambre to ChambreDto and format image URLs
+        List<ChambreDto> chambreDtos = chambres.stream()
+                .map(chambre -> {
+                    ChambreDto dto = new ChambreDto()
+                            .setId_cham(chambre.getId_cham())
+                            .setName(chambre.getName())
+                            .setPrixJour(chambre.getPrixJour())
+                            .setCapacite(chambre.getCapacite())
+                            .setDisponibilites(chambre.isDisponibilites())
+                            .setDescription(chambre.getDescription())
+                            .setImageUrl(chambre.getImageUrl());
+    
+                    // Ensure imageUrl is prefixed with base URL
+                    if (dto.getImageUrl() != null && !dto.getImageUrl().startsWith("http")) {
+                        dto.setImageUrl("http://192.168.100.4:9001/" + dto.getImageUrl());
+                    }
+    
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    
+        return ResponseEntity.ok(chambreDtos);
+    }
+    
+    
 
 @PostMapping("/create")
 public ResponseEntity<?> createChambre(

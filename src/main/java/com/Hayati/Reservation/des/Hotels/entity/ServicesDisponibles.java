@@ -1,5 +1,10 @@
 package com.Hayati.Reservation.des.Hotels.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,4 +21,5 @@ public class ServicesDisponibles {
 
     @Column(nullable = false)
     private String type;
+  
 }

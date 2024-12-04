@@ -2,10 +2,12 @@ package com.Hayati.Reservation.des.Hotels.services;
 
 import com.Hayati.Reservation.des.Hotels.dto.HotelDto;
 import com.Hayati.Reservation.des.Hotels.entity.Hotel;
+import com.Hayati.Reservation.des.Hotels.entity.ServicesDisponibles;
 import com.Hayati.Reservation.des.Hotels.entity.Subscribe;
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
 import com.Hayati.Reservation.des.Hotels.exceptions.ResourceNotFoundException;
 import com.Hayati.Reservation.des.Hotels.repositoriy.HotelRepositoriy;
+import com.Hayati.Reservation.des.Hotels.repositoriy.ServicesDisponiblesRepositoriy;
 import com.Hayati.Reservation.des.Hotels.repositoriy.SubscribeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,15 +28,16 @@ import java.util.stream.Collectors;
 public class HotelService {
 
     private final String IMAGE_UPLOAD_DIR = "C:/Pfe/Reservation_hotels/";
-    private final String BASE_IMAGE_URL = "http://192.168.100.108:9001/";
+    private final String BASE_IMAGE_URL = "http://192.168.100.4:9001/";
 
     private final SubscribeRepository subscribeRepository;
     private final HotelRepositoriy hotelRepository;
-
+    private final ServicesDisponiblesRepositoriy servicesDisponiblesRepositoriy;
     @Autowired
-    public HotelService(SubscribeRepository subscribeRepository, HotelRepositoriy hotelRepository) {
+    public HotelService(SubscribeRepository subscribeRepository, HotelRepositoriy hotelRepository,ServicesDisponiblesRepositoriy servicesDisponiblesRepositoriy) {
         this.subscribeRepository = subscribeRepository;
         this.hotelRepository = hotelRepository;
+        this.servicesDisponiblesRepositoriy=servicesDisponiblesRepositoriy;
     }
 
     // Retrieve list of all hotels
@@ -85,10 +89,11 @@ public class HotelService {
         hotelRepository.delete(hotel);
     }
 
-    // Create a new hotel
     public HotelDto createHotel(HotelDto hotelDto, MultipartFile photo) {
+        // Sauvegarder l'image et obtenir l'URL
         String imageUrl = saveImage(photo, "hotel_photos/");
-
+    
+        // Créer une instance de l'hôtel
         Hotel hotel = new Hotel();
         hotel.setName(hotelDto.getName());
         hotel.setEmplacement(hotelDto.getEmplacement());
@@ -100,16 +105,27 @@ public class HotelService {
         hotel.setDescription(hotelDto.getDescription());
         hotel.setStatus(hotelDto.getStatus() != null ? hotelDto.getStatus() : Status.ATTEND);
         hotel.setImageUrl(imageUrl);
-
+    
+        // Associer l'utilisateur (Subscribe)
         if (hotelDto.getSubscribe_id() != null) {
             Optional<Subscribe> subscribe = subscribeRepository.findById(hotelDto.getSubscribe_id());
-            subscribe.ifPresent(hotel::setSubscribe); // Set Subscribe entity
+            subscribe.ifPresent(hotel::setSubscribe);
         }
-
+    
+        // // Associer les services disponibles
+        // if (hotelDto.getServiceIds() != null && !hotelDto.getServiceIds().isEmpty()) {
+        //     List<ServicesDisponibles> services = servicesDisponiblesRepositoriy.findAllById(hotelDto.getServiceIds());
+        //     hotel.setServicesDisponibles(new HashSet<>(services));
+        // }
+        
+    
+        // Sauvegarder l'hôtel
         Hotel savedHotel = hotelRepository.save(hotel);
-
+    
+        // Convertir l'entité en DTO pour la réponse
         return mapToDto(savedHotel);
     }
+    
 
     public Optional<Hotel> getHotelById(Long id) {
     return hotelRepository.findById(id);

@@ -71,16 +71,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void setAuthentication(HttpServletRequest request, String jwt, UserDetails userDetails) {
         Claims claims = jwtService.extractAllClaims(jwt);
         List<String> roles = claims.get("roles", List.class);
-
+    
+        // Assign default roles if none are found
+        if (roles == null || roles.isEmpty()) {
+            roles = List.of("USER"); // Default role or empty list
+        }
+    
         List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-
+    
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null, authorities
         );
-
+    
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
+    
+    
 }

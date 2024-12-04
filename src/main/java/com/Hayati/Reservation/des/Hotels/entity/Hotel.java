@@ -3,6 +3,7 @@ package com.Hayati.Reservation.des.Hotels.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.Hayati.Reservation.des.Hotels.enumeration.Status;
@@ -64,6 +65,7 @@ public class Hotel {
     )
     
     private Set<ServicesDisponibles> servicesDisponibles;
+    
 
     @Column(nullable = false)
     private String imageUrl;

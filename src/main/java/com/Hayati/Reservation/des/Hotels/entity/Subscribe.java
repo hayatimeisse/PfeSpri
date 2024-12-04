@@ -17,14 +17,14 @@ import lombok.Setter;
 @Table(name = "subscribe")
 public class Subscribe extends User {
 
-
-    private Status status;
+    @Column(length = 500)
+        private Status status;
 
     @Override
     public String getUsername() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return this.getEmail(); // Utilisez l'email comme nom d'utilisateur
     }
+    
 
    
 

@@ -52,7 +52,6 @@ public class ClientService {
         client.setName(input.getNom());
         client.setEmail(input.getEmail());
         client.setPassword(passwordEncoder.encode(input.getPassword()));
-        client.setNumerodetelephone(input.getNumerodetelephone());
     
         // Ajouter le rôle 'ROLE_CLIENT'
         client.getRoles().add("ROLE_CLIENT");
@@ -60,12 +59,7 @@ public class ClientService {
         // Enregistrer le client dans la base de données
         Client savedClient = clientRepository.save(client);
     
-        // Générer l'URL complète pour l'image si elle est présente
-        if (savedClient.getPhoto() != null) {
-            savedClient.setPhoto("http://localhost:9001/" + savedClient.getPhoto());
-        }
-    
-        // Retourner le client avec les rôles associés
+      
         return savedClient;
     }
     
@@ -76,23 +70,17 @@ public class ClientService {
     @PreAuthorize("hasRole('ADMIN')")
     public Client updateClient(UpdateClientDto input, Long id) {
         return clientRepository.findById(id).map(existingClient -> {
-            // If there's a new photo, update it
-            if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
-                String photoPath = saveImage(input.getPhoto(), "client_photos/");
-                existingClient.setPhoto(photoPath);
-            }
+           
 
             existingClient.setName(input.getNom());
             existingClient.setEmail(input.getEmail());
             if (input.getPassword() != null && !input.getPassword().isEmpty()) {
                 existingClient.setPassword(passwordEncoder.encode(input.getPassword()));
             }
-            existingClient.setNumerodetelephone(input.getNumerodetelephone());
 
             Client updatedClient = clientRepository.save(existingClient);
 
-            // Set full URL for the photo
-            updatedClient.setPhoto("http://localhost:9001/" + updatedClient.getPhoto());
+           
 
             return updatedClient;
         }).orElseThrow(() -> new RuntimeException("Client not found"));
@@ -135,19 +123,10 @@ public class ClientService {
             client.setPassword(passwordEncoder.encode(updateDto.getPassword()));
         }
 
-        // Sauvegarder la photo si elle est fournie
-        if (photo != null && !photo.isEmpty()) {
-            String photoFileName = saveImage(photo, "client_photos/");
-            client.setPhoto(photoFileName); // Enregistrer le chemin relatif dans la base de données
-        }
-
-        // Sauvegarder le client mis à jour
+     
         Client updatedClient = clientRepository.save(client);
 
-        // Mettre à jour l'URL complète pour la photo
-        if (updatedClient.getPhoto() != null) {
-            updatedClient.setPhoto(BASE_IMAGE_URL + updatedClient.getPhoto());
-        }
+       
 
         return updatedClient;
     }

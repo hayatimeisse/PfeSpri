@@ -21,8 +21,7 @@ import lombok.experimental.Accessors;
 @Table(name = "client")
 public class Client extends User {
  
-    @Column(nullable = false)
-    private String photo;
+   
     @Column(nullable = false)
     private boolean isEmailVerified = false;
 
@@ -51,15 +50,7 @@ public class Client extends User {
         return this;
     }
 
-    @Override
-    public Client setNumerodetelephone(String numerodetelephone) {
-        super.setNumerodetelephone(numerodetelephone);
-        return this;
-    }
-
-    public Client setPhoto(String photo) {
-        this.photo = photo;
-        return this;
-    }
+   
+  
 }
 

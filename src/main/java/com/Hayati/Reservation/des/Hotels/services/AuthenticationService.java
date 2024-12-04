@@ -69,12 +69,7 @@ public class AuthenticationService {
         User savedUser = userRepository.save(client);
         client.setId(savedUser.getId());
 
-        if (input.getPhoto() != null && !input.getPhoto().isEmpty()) {
-            String photoPath = saveImage(input.getPhoto(), CLIENT_IMAGE_UPLOAD_DIR);
-            client.setPhoto(photoPath);
-        } else {
-            throw new RuntimeException("Une photo est requise pour l'inscription");
-        }
+      
 
         client.getRoles().add("ROLE_CLIENT");
         return clientRepository.save(client);
