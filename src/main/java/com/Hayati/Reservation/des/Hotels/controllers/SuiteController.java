@@ -54,40 +54,42 @@ public class SuiteController {
     }
 
 
- @PostMapping("/create")
+    @PostMapping("/create")
     public ResponseEntity<?> createSuite(
         @RequestParam("prixJour") String prixJourStr,
         @RequestParam("disponibilites") boolean disponibilites,
         @RequestParam("description") String description,
         @RequestParam("hotelId") Long hotelId,
-            @RequestParam("photo") MultipartFile photo) {
-
+        @RequestParam("photo") MultipartFile photo) {
+    
         // Valider la taille du fichier
         if (photo.getSize() > 52428800) { // 50MB en octets
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Fichier trop volumineux !");
         }
+    
         float prixJour;
-    try {
-        prixJour = Float.parseFloat(prixJourStr);
-    } catch (NumberFormatException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Format du prix invalide !");
-    }
-
+        try {
+            prixJour = Float.parseFloat(prixJourStr);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Format du prix invalide !");
+        }
+    
         SuiteDto suiteDto = new SuiteDto()
                     .setDisponibilites(disponibilites)
                     .setDescription(description)
-                    .setHotel_id(hotelId);
-
+                    .setHotel_id(hotelId)
+                    .setPrixJour(prixJour); // Ajoutez cette ligne
+    
         SuiteDto createdSuite = suiteService.createSuite(suiteDto, photo);
-
+    
         if (createdSuite != null && createdSuite.getImageUrl() != null) {
             String imageUrl = "http://192.168.100.4:9001/" + createdSuite.getImageUrl();
             createdSuite.setImageUrl(imageUrl);
         }
-
+    
         return ResponseEntity.ok(createdSuite);
     }
-
+    
     // Mettre à jour un hôtel
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateSuite(

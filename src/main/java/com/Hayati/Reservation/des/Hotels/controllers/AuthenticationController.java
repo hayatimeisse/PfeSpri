@@ -15,6 +15,8 @@ import com.Hayati.Reservation.des.Hotels.services.EmailService;
 import com.Hayati.Reservation.des.Hotels.services.JwtService;
 import com.Hayati.Reservation.des.Hotels.services.JwtTokenProvider;
 import com.Hayati.Reservation.des.Hotels.services.SubscribeService;
+import com.Hayati.Reservation.des.Hotels.services.TokenService;
+import com.Hayati.Reservation.des.Hotels.services.UserService;
 import com.Hayati.Reservation.des.Hotels.services.VerificationCodeService;
 
 import io.jsonwebtoken.io.IOException;
@@ -58,11 +60,12 @@ public class AuthenticationController {
   private final EmailService emailService;
   private final VerificationCodeRepository verificationCodeRepository;
   private final VerificationCodeService verificationCodeService;
+  private final TokenService tokenService;
   @Autowired
   private ClientRepository clientRepository;
   @Autowired
   private AdminRepository adminRepository;
-    public AuthenticationController(JwtService jwtService,VerificationCodeService verificationCodeService, SubscribeService subscribeService,AuthenticationService authenticationService,EmailService emailService,ClientService clientService,VerificationCodeRepository verificationCodeRepository) {
+    public AuthenticationController( TokenService tokenService,JwtService jwtService,VerificationCodeService verificationCodeService, SubscribeService subscribeService,AuthenticationService authenticationService,EmailService emailService,ClientService clientService,VerificationCodeRepository verificationCodeRepository) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
         this.subscribeService =subscribeService;
@@ -70,6 +73,7 @@ public class AuthenticationController {
         this.clientService=clientService;
         this.verificationCodeRepository=verificationCodeRepository;
         this.verificationCodeService=verificationCodeService;
+        this.tokenService=tokenService;
     }
 
  
@@ -390,9 +394,33 @@ public ResponseEntity<?> resetPassword(
     
         return ResponseEntity.ok(profileDto);
     }
+      @Autowired
+    private UserService userService;
+  
+    
+    @PutMapping("/{id}/email")
+    public ResponseEntity<?> updateEmail(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String newEmail = request.get("email");
+    
+        if (newEmail == null || !newEmail.contains("@")) {
+            return ResponseEntity.badRequest().body("Email invalide");
+        }
+    
+        try {
+            // Mise à jour de l'email
+            User user = authenticationService.updateEmail(id, newEmail);
+    
+            // Invalider tous les anciens tokens
+            tokenService.invalidateTokens(user.getId()); // Passez l'ID de l'utilisateur
+    
+            return ResponseEntity.ok("Email mis à jour avec succès");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
     
     
-    
+
     
     @GetMapping("/client-profile")
 public ResponseEntity<?> getClientProfile(@RequestHeader("Authorization") String token) {

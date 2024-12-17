@@ -74,7 +74,13 @@ public class AuthenticationService {
         client.getRoles().add("ROLE_CLIENT");
         return clientRepository.save(client);
     }
-
+    public User updateEmail(Long id, String newEmail) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        user.setEmail(newEmail);
+        userRepository.save(user);
+        return user;
+    }
+    
     public Subscribe signupSubscribe(RegisterSubscribeDto input) {
         Subscribe subscribe = new Subscribe();
         subscribe.setName(input.getNom());

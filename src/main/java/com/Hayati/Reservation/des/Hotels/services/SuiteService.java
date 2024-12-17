@@ -74,23 +74,23 @@ public class SuiteService {
     // Créer une nouvelle suite avec téléchargement d'image et association à un hôtel
     public SuiteDto createSuite(SuiteDto suiteDto, MultipartFile photo) {
         String imageUrl = saveImage(photo, "suite_photos/");
-
+    
         Suite suite = new Suite();
         suite.setPrixJour(suiteDto.getPrixJour());
         suite.setDisponibilites(suiteDto.isDisponibilites());
         suite.setDescription(suiteDto.getDescription());
         suite.setImageUrl(imageUrl);
-
+    
         // Vérifiez que l'ID de l'hôtel est fourni et associez l'hôtel à la suite
         if (suiteDto.getHotel_id() != null) {
             Optional<Hotel> hotel = hotelRepositoriy.findById(suiteDto.getHotel_id());
             hotel.ifPresent(suite::setHotel);
         }
-
+    
         Suite savedSuite = suiteRepositoriy.save(suite);
         return mapToDto(savedSuite);
     }
-
+    
     // Obtenir la liste de toutes les suites
     public List<SuiteDto> getAllSuites() {
         return suiteRepositoriy.findAll().stream()
