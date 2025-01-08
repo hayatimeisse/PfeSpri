@@ -47,7 +47,7 @@ public class ChambreService {
   
     // Créer une nouvelle chambre avec téléchargement d'image et association à une suite
     public ChambreDto createChambre(ChambreDto chambreDto, MultipartFile photo) {
-        String imageUrl = saveImage(photo, "chambre_photos/");
+        String imageUrl = saveImage(photo, "chambre_photos/",true);
 
         Chambre chambre = new Chambre();
         chambre.setName(chambreDto.getName());
@@ -121,7 +121,7 @@ public class ChambreService {
             Chambre existingChambre = existingChambreOptional.get();
 
             if (photo != null && !photo.isEmpty()) {
-                String photoPath = saveImage(photo, "chambre_photos/");
+                String photoPath = saveImage(photo, "chambre_photos/",false);
                 existingChambre.setImageUrl(photoPath);
             }
 
@@ -145,9 +145,16 @@ public class ChambreService {
     }
   
     // Fonction pour enregistrer l'image sur le serveur
-    private String saveImage(MultipartFile photo, String subDir) {
+        private String saveImage(MultipartFile photo, String subDir,boolean created) {
         try {
-            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String fileName="";
+            if(created){
+             fileName = "123" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+            }else{
+             fileName = "122" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+            }
             Path path = Paths.get(IMAGE_UPLOAD_DIR + subDir + fileName);
             Files.createDirectories(path.getParent());
             Files.write(path, photo.getBytes());

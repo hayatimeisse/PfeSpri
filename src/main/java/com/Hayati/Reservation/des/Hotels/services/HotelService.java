@@ -91,7 +91,7 @@ public class HotelService {
 
     public HotelDto createHotel(HotelDto hotelDto, MultipartFile photo) {
         // Sauvegarder l'image et obtenir l'URL
-        String imageUrl = saveImage(photo, "hotel_photos/");
+        String imageUrl = saveImage(photo, "hotel_photos/",true);
     
         // Créer une instance de l'hôtel
         Hotel hotel = new Hotel();
@@ -141,7 +141,7 @@ public class HotelService {
             Hotel existingHotel = existingHotelOptional.get();
 
             if (photo != null && !photo.isEmpty()) {
-                String photoPath = saveImage(photo, "hotel_photos/");
+                String photoPath = saveImage(photo, "hotel_photos/",false);
                 existingHotel.setImageUrl(photoPath);
             }
 
@@ -163,9 +163,16 @@ public class HotelService {
     }
 
     // Helper method to save images
-    private String saveImage(MultipartFile photo, String subDir) {
+    private String saveImage(MultipartFile photo, String subDir,boolean created) {
         try {
-            String fileName = "123" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String fileName="";
+            if(created){
+             fileName = "123" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+            }else{
+             fileName = "122" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+            }
             Path path = Paths.get(IMAGE_UPLOAD_DIR + subDir + fileName);
             Files.createDirectories(path.getParent());
             Files.write(path, photo.getBytes());
