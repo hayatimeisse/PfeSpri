@@ -150,7 +150,6 @@ public class SuiteService {
              fileName = "122" + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 
             }
-            String fileName = System.currentTimeMillis() + "_" + photo.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
             Path path = Paths.get(IMAGE_UPLOAD_DIR + subDir + fileName);
             Files.createDirectories(path.getParent());
             Files.write(path, photo.getBytes());
